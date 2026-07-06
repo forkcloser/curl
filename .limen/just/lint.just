@@ -10,7 +10,7 @@ set quiet
 # Shared private _banner recipe (see _lib.just).
 import '_lib.just'
 
-default: limen just aqua links yaml shell dockerfile commits
+default: links yaml shell dockerfile commits just aqua limen
 
 # Go linters live in their own submodule: `just do lint go` runs them all,
 # `just do lint go <recipe>` (e.g. `just do lint go mod`) runs one.

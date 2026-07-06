@@ -80,3 +80,26 @@ jobs:
 
       - name: Test
         run: just test
+
+  # Prove the pinned curl-for-win package: exists on curl.se AND its sigstore
+  # bundle verifies against the vendored key. This is what makes a Renovate
+  # CFW_PACKAGE bump self-verifying — the PR cannot go green on a package
+  # that would fail at release time.
+  import:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Install aqua (pinned, checksum-verified)
+        uses: ./.github/actions/setup-aqua
+
+      - name: Install pinned tools
+        run: aqua install --only-link
+
+      - name: Import and verify the windows packages
+        run: just import-windows

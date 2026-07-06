@@ -28,5 +28,36 @@
       ],
       datasourceTemplate: "github-releases",
     },
+    // CFW_PACKAGE in versions.env: the curl-for-win package this repo tracks,
+    // in curl.se's own <curl-version>_<build-rev> form. Watched straight off
+    // the curl.se download index (an HTML page — the hrefs carry the token),
+    // so a bump PR can only ever propose something that is actually
+    // downloadable. CFW_COMMIT is deliberately NOT managed: bumping it means
+    // re-auditing the build scripts and re-cross-checking the vendored key —
+    // human work (see versions.env).
+    {
+      customType: "regex",
+      managerFilePatterns: ["/^versions\\.env$/"],
+      matchStrings: [
+        "# renovate: depName=(?<depName>[^\\s]+)\\nCFW_PACKAGE=(?<currentValue>[^\\s]+)",
+      ],
+      datasourceTemplate: "custom.curl-for-win",
+      // Order 8.21.0_2-style tokens: the build rev is a 4th numeric component.
+      versioningTemplate: "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)_(?<build>\\d+)$",
+    },
+  ],
+  customDatasources: {
+    "curl-for-win": {
+      defaultRegistryUrlTemplate: "https://curl.se/windows/",
+      format: "html",
+    },
+  },
+  packageRules: [
+    {
+      matchDatasources: ["custom.curl-for-win"],
+      // Index hrefs look like dl-8.21.0_2/curl-8.21.0_2-win64-mingw.zip —
+      // the leading directory component carries the package token.
+      extractVersion: "^dl-(?<version>\\d+\\.\\d+\\.\\d+_\\d+)/",
+    },
   ],
 }
