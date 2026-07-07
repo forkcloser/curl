@@ -7,8 +7,8 @@ set working-directory := '../..'
 # Silence just's per-line command echo; recipes announce themselves via _banner.
 set quiet
 
-# Shared private _banner recipe (see _lib.just).
-import '_lib.just'
+# Shared private _banner recipe (see lib.just).
+import 'lib.just'
 
 # Homebrew formula linting runs through brew itself: brew vendors its own Ruby
 # and its own RuboCop with the Homebrew cops, so this module needs no Ruby
@@ -32,6 +32,7 @@ default: style audit
 style: (_banner "lint homebrew" "style")
     #!/usr/bin/env bash
     set -euo pipefail
+    {{ _skip_unless_macos }}
     # --cached --others --exclude-standard: tracked *and* new untracked files,
     # still honoring .gitignore (same as `lint just`). The patterns are the
     # modern tap layout ONLY: Formula/ (sharded subdirectories included) and
@@ -42,6 +43,8 @@ style: (_banner "lint homebrew" "style")
     # brew-less.
     files=()
     while IFS= read -r -d '' f; do
+        # Tracked-but-deleted files are skipped (see lint.just's `just` recipe).
+        [ -f "$f" ] || continue
         files+=("$f")
     done < <(git ls-files -z --cached --others --exclude-standard \
         'Formula/*.rb' 'Formula/**/*.rb' 'Casks/*.rb' 'Casks/**/*.rb')
@@ -63,10 +66,17 @@ style: (_banner "lint homebrew" "style")
 audit: (_banner "lint homebrew" "audit")
     #!/usr/bin/env bash
     set -euo pipefail
+    {{ _skip_unless_macos }}
     # Same vacuous pass as `style`: no formulas, nothing to audit, no brew
-    # (and no tap declaration) required.
-    if [ -z "$(git ls-files --cached --others --exclude-standard \
-        'Formula/*.rb' 'Formula/**/*.rb' 'Casks/*.rb' 'Casks/**/*.rb')" ]; then
+    # (and no tap declaration) required. Tracked-but-deleted files are skipped
+    # (see lint.just's `just` recipe), so a tree whose only formulas are
+    # unstaged deletions passes vacuously too.
+    present=""
+    while IFS= read -r -d '' f; do
+        [ -f "$f" ] && present=1 && break
+    done < <(git ls-files -z --cached --others --exclude-standard \
+        'Formula/*.rb' 'Formula/**/*.rb' 'Casks/*.rb' 'Casks/**/*.rb')
+    if [ -z "$present" ]; then
         echo "no formulas or casks (Formula/, Casks/) — nothing to audit."
         exit 0
     fi
@@ -106,6 +116,19 @@ audit: (_banner "lint homebrew" "audit")
     trap cleanup EXIT
     # shellcheck disable=SC2086 # deliberate word-split of the flags knob.
     "$BREW_BIN" audit --strict --tap "$tap" ${LINT_HOMEBREW_AUDIT_FLAGS:-}
+
+# Homebrew exists on macOS only: everywhere else these recipes degrade to a
+# LOUD no-op, so a repository can keep homebrew in its lint/fix aggregates
+# and still run the full suite on the linux/windows legs of the matrix.
+# Injected into recipe bodies as a just variable (same mechanism as
+# _require_brew below); the twin lives in fix-homebrew.just.
+[private]
+_skip_unless_macos := '''
+    if [ "$(uname -s)" != 'Darwin' ]; then
+        echo "homebrew is macOS-only — nothing to do on this platform (skipped, not failed)."
+        exit 0
+    fi
+'''
 
 # BREW_BIN is captured from the ambient PATH in main.just (see the module
 # comment); this only refuses when that capture came up empty. Injected into

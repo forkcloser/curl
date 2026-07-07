@@ -13,8 +13,8 @@ test:
 import-windows:
     ./import-windows.sh
 
-# Build a posix leg (linux static-musl, mac universal) with curl-for-win's
-# machinery at the audited pin. Meant for CI runners — the underlying entry
-# scripts provision podman containers / homebrew packages.
+# Build a posix leg (linux-amd64, linux-arm64, mac universal) with
+# curl-for-win's machinery at the audited pin. Linux legs run in their
+# digest-pinned debian container (podman or docker); mac needs a macOS host.
 build-posix target:
     ./build-posix.sh {{ target }}

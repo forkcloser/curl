@@ -51,28 +51,38 @@
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/farcloser/limen/v0.0.0-test.8/limen_0.0.0-test.8_darwin_amd64.tar.gz",
-      "checksum": "0A5DA0EFE10DF07B77C0979955FEE7A2943CEE5D2581D53C965CD88BD317101E",
+      "id": "github_release/github.com/cli/cli/v2.96.0/gh_2.96.0_windows_arm64.zip",
+      "checksum": "C517E0B32C98A4BA90AC95AF8D12CC3AC55781AB4AB72F9A91CE3DE0541D2B09",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/farcloser/limen/v0.0.0-test.8/limen_0.0.0-test.8_darwin_arm64.tar.gz",
-      "checksum": "0B07BA3FC6E89D58A3F230F0A2513B6B2E55FF50B94D83DC3F7708E865F2A7B5",
+      "id": "github_release/github.com/farcloser/limen/v0.0.3/limen_0.0.3_darwin_amd64.tar.gz",
+      "checksum": "4B4CDBACFB776C5FBC7B7E2794B8C09EE6250BFD97596DB337305D04AB22295A",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/farcloser/limen/v0.0.0-test.8/limen_0.0.0-test.8_linux_amd64.tar.gz",
-      "checksum": "1D6CA0E666E3647E422669369FAB575F1F8686B92A8E92A5D514BAB1301CA55F",
+      "id": "github_release/github.com/farcloser/limen/v0.0.3/limen_0.0.3_darwin_arm64.tar.gz",
+      "checksum": "D9929933AB71D358BA7F88D428F72911C7DDAFE56F738808E8AAED7CF2A4B210",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/farcloser/limen/v0.0.0-test.8/limen_0.0.0-test.8_linux_arm64.tar.gz",
-      "checksum": "B1494FEA72A056F4483B2D45454F1129194E2330070564E12594A6436DC9015D",
+      "id": "github_release/github.com/farcloser/limen/v0.0.3/limen_0.0.3_linux_amd64.tar.gz",
+      "checksum": "B8083176F7D89857D0461D1B685DC742283E2F0C2B6D4047460413FED1CACB26",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/farcloser/limen/v0.0.0-test.8/limen_0.0.0-test.8_windows_amd64.tar.gz",
-      "checksum": "D241EDBF7140238A03977FF7B55324A760F4CE84E1B9CE980194015FEB19B58B",
+      "id": "github_release/github.com/farcloser/limen/v0.0.3/limen_0.0.3_linux_arm64.tar.gz",
+      "checksum": "51170A9D21B9EE6A09FAB22A31FE8986A169E1FB0BFBA78539285BB539ECBDE2",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/farcloser/limen/v0.0.3/limen_0.0.3_windows_amd64.tar.gz",
+      "checksum": "A265112F2C9F2BC39D35D47AA8270223533909F7474D67B1218FBAA0B78353FF",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/farcloser/limen/v0.0.3/limen_0.0.3_windows_arm64.tar.gz",
+      "checksum": "3DB7AA9A7F54521DD378380FD9AAE5707094AFF5EBC461BB90D6389BB3EA748C",
       "algorithm": "sha256"
     },
     {
@@ -101,6 +111,11 @@
       "algorithm": "sha256"
     },
     {
+      "id": "github_release/github.com/golangci/golangci-lint/v2.12.2/golangci-lint-2.12.2-windows-arm64.zip",
+      "checksum": "947B9A5BF762D465710B376C156F0184ABB2168378B0826AF1899E0EE7183742",
+      "algorithm": "sha256"
+    },
+    {
       "id": "github_release/github.com/google/yamlfmt/v0.21.0/yamlfmt_0.21.0_Darwin_arm64.tar.gz",
       "checksum": "4B417ECB94339D57E4C122ECC948C1A00FE328B5853266DE9806E652A92858FA",
       "algorithm": "sha256"
@@ -121,6 +136,11 @@
       "algorithm": "sha256"
     },
     {
+      "id": "github_release/github.com/google/yamlfmt/v0.21.0/yamlfmt_0.21.0_Windows_arm64.tar.gz",
+      "checksum": "C1E64D1C72CA8986BC5B8C8EDD4EC89F0627804E7E08F8DE9F4B484CB5CAD897",
+      "algorithm": "sha256"
+    },
+    {
       "id": "github_release/github.com/google/yamlfmt/v0.21.0/yamlfmt_0.21.0_Windows_x86_64.tar.gz",
       "checksum": "07F80CE5D741EB4B0A9380AC78A19C7CB5BD44E2A9A47A5A04839E3BA54DD463",
       "algorithm": "sha256"
@@ -138,6 +158,11 @@
     {
       "id": "github_release/github.com/goreleaser/goreleaser/v2.16.0/goreleaser_Linux_x86_64.tar.gz",
       "checksum": "EAAE05B5EBA07533BD0F06846B68C808399504784DF00C62EB219541FC04E5E2",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/goreleaser/goreleaser/v2.16.0/goreleaser_Windows_arm64.zip",
+      "checksum": "1183C81863044CE9BAA89C1393C258949390B8DF683DF7CA959E9C718D7723C9",
       "algorithm": "sha256"
     },
     {
@@ -168,6 +193,11 @@
     {
       "id": "github_release/github.com/gotestyourself/gotestsum/v1.13.0/gotestsum_1.13.0_windows_amd64.tar.gz",
       "checksum": "FD5A6DC69E46A0970593E70D85A7E75F16714E9C61D6D72CCC324EB82DF5BB8A",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/gotestyourself/gotestsum/v1.13.0/gotestsum_1.13.0_windows_arm64.tar.gz",
+      "checksum": "72A59200F83B3204CD59FD417E384DB0543C5511D7A9E38957E74A4035950943",
       "algorithm": "sha256"
     },
     {
@@ -293,6 +323,11 @@
     {
       "id": "http/golang.org/dl/go1.26.4.windows-amd64.zip",
       "checksum": "3CA8FB4630B07C419CBDD51F754E31363CFCFB83B3A5354D9E895C90BE2CC345",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "http/golang.org/dl/go1.26.4.windows-arm64.zip",
+      "checksum": "62247F56FB7D7B827D237152C4E3FCD69A24D0FA9430DC73DBDA7593AE82BC8D",
       "algorithm": "sha256"
     },
     {

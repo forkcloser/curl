@@ -7,11 +7,16 @@
 # packages from curl-for-win, generates GitHub Artifact Attestations for
 # every archive (aqua verifies these natively on install), and publishes the
 # release with a checksums.txt for aqua's checksum pinning.
+#
+# workflow_dispatch is the DRY RUN: every leg builds and uploads its workflow
+# artifacts, and the publish job is skipped (tag refs only) — validate the
+# whole pipeline without cutting a release.
 name: release
 
 on:
   push:
     tags: ["v*"]
+  workflow_dispatch:
 
 permissions: {}
 
@@ -53,7 +58,7 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/setup-aqua
       - run: aqua install --only-link
-      - run: just build-posix linux
+      - run: just build-posix linux-amd64
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: dist-linux-amd64
@@ -70,7 +75,7 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/setup-aqua
       - run: aqua install --only-link
-      - run: just build-posix linux
+      - run: just build-posix linux-arm64
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: dist-linux-arm64
@@ -95,6 +100,9 @@ jobs:
           path: build/dist/*.tar.gz
 
   publish:
+    # Tag pushes only: a workflow_dispatch run is a dry run — it proves every
+    # build leg and stops here.
+    if: startsWith(github.ref, 'refs/tags/v')
     needs: [windows, linux-amd64, linux-arm64, mac]
     runs-on: ubuntu-24.04
     timeout-minutes: 15

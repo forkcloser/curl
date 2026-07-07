@@ -48,3 +48,9 @@ re-auditing the scripts and re-cross-checking the key — never automated).
 
 Manual bump, when needed: edit `CFW_PACKAGE`, run `just import-windows` to
 prove it, then commit, tag, push.
+
+Note the coupling: curl-for-win's tree hardcodes the curl version it builds,
+so a **curl version bump needs both pins moved together** — `CFW_PACKAGE`
+(Renovate's PR) *and* `CFW_COMMIT` (the human audit). A mismatch cannot ship:
+the posix legs collect artifacts by version glob and fail loudly when the
+pinned scripts built something other than `CFW_PACKAGE` says.

@@ -7,8 +7,8 @@ set working-directory := '../..'
 # Silence just's per-line command echo; recipes announce themselves via _banner.
 set quiet
 
-# Shared private _banner recipe (see _lib.just).
-import '_lib.just'
+# Shared private _banner recipe (see lib.just).
+import 'lib.just'
 
 default: limen just yaml
 
@@ -19,13 +19,23 @@ default: limen just yaml
 limen: (_banner "fix" "limen")
     ${LIMEN_BIN:-limen} fix .
 
+# Repair what `just do lint github` reports — plans first, applies on consent
+# (pass -yes for unattended use, -org <name> for the organization). Never in
+# the default set, same reasoning as the lint twin.
+github *args: (_banner "fix" "github")
+    ${LIMEN_BIN:-limen} github fix {{ args }}
+
 just: (_banner "fix" "just")
     #!/usr/bin/env bash
     set -euo pipefail
     # --cached --others --exclude-standard: tracked *and* new untracked files,
     # still honoring .gitignore — so a not-yet-staged file is formatted too.
-    git ls-files -z --cached --others --exclude-standard 'justfile' 'Justfile' '*.just' '**/justfile' \
-      | xargs -0 -I{} just --fmt --justfile {}
+    # Tracked-but-deleted files are skipped (see `lint just` for the rationale:
+    # enumeration is git's, truth is the working tree's).
+    while IFS= read -r -d '' f; do
+        [ -f "$f" ] || continue
+        just --fmt --justfile "$f"
+    done < <(git ls-files -z --cached --others --exclude-standard 'justfile' 'Justfile' '*.just' '**/justfile')
 
 yaml: (_banner "fix" "yaml")
     yamlfmt -conf .limen/.yamlfmt

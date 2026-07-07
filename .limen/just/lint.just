@@ -7,8 +7,8 @@ set working-directory := '../..'
 # Silence just's per-line command echo; recipes announce themselves via _banner.
 set quiet
 
-# Shared private _banner recipe (see _lib.just).
-import '_lib.just'
+# Shared private _banner recipe (see lib.just).
+import 'lib.just'
 
 default: links yaml shell dockerfile commits just aqua limen
 
@@ -33,13 +33,29 @@ mod homebrew 'lint-homebrew.just'
 limen: (_banner "lint" "limen")
     ${LIMEN_BIN:-limen} check .
 
+# GitHub settings audit — `limen github check` against this repository
+# (inferred from origin), or any target the subcommand takes
+# (`just do lint github -org farcloser`). Named, never in the default set: it
+# needs the network and an authed gh, and its subject is the live GitHub
+# state, not the tree. Same LIMEN_BIN override as `lint limen`.
+github *args: (_banner "lint" "github")
+    ${LIMEN_BIN:-limen} github check {{ args }}
+
 just: (_banner "lint" "just")
     #!/usr/bin/env bash
     set -euo pipefail
     # --cached --others --exclude-standard: tracked *and* new untracked files,
-    # still honoring .gitignore — so a not-yet-staged file is linted too.
-    git ls-files -z --cached --others --exclude-standard 'justfile' 'Justfile' '*.just' '**/justfile' \
-      | xargs -0 -I{} just --fmt --check --justfile {}
+    # still honoring .gitignore — so a not-yet-staged file is linted too. The
+    # index half of that union also lists files deleted from the worktree but
+    # not yet staged (a mid-migration tree, e.g. a renamed canonical module),
+    # so every path is existence-checked before it reaches a tool: enumeration
+    # is git's (ignore semantics), truth is the working tree's. Deleted files
+    # are vacuously well-formatted; guarding required files is `limen check`'s
+    # job, not a formatter's.
+    while IFS= read -r -d '' f; do
+        [ -f "$f" ] || continue
+        just --fmt --check --justfile "$f"
+    done < <(git ls-files -z --cached --others --exclude-standard 'justfile' 'Justfile' '*.just' '**/justfile')
 
 # godolint — hadolint as pure Go (https://github.com/farcloser/godolint) —
 # over every Dockerfile in the repository; passes vacuously when there are
@@ -58,6 +74,8 @@ dockerfile: (_banner "lint" "dockerfile")
     # already matches across directories; a literal like 'Dockerfile' does not.
     files=()
     while IFS= read -r -d '' f; do
+        # Tracked-but-deleted files are skipped (see `lint just`).
+        [ -f "$f" ] || continue
         files+=("$f")
     done < <(git ls-files -z --cached --others --exclude-standard \
         'Dockerfile' '**/Dockerfile' 'Dockerfile.*' '**/Dockerfile.*' '*.Dockerfile' \
@@ -81,6 +99,8 @@ shell: (_banner "lint" "shell")
     # No mapfile (bash 4+): build the array with a read loop, portable to bash 3.2.
     files=()
     while IFS= read -r -d '' f; do
+        # Tracked-but-deleted files are skipped (see `lint just`).
+        [ -f "$f" ] || continue
         case "$f" in
             *.sh|*.bash) files+=("$f"); continue ;;
         esac
@@ -137,12 +157,12 @@ links: (_banner "lint" "links")
     set -euo pipefail
     # A directory input (not a glob) is what makes lychee honor .gitignore/hidden.
     # Canonical exclusions (and their rationale) live in .limen/lychee.toml; a
-    # repository adds its own in a root lychee.toml. Both must be passed
+    # repository adds its own in a root .lychee.toml. Both must be passed
     # explicitly — any --config disables lychee's ./lychee.toml auto-discovery —
     # and lychee merges them, concatenating the exclude lists.
     args=(--config .limen/lychee.toml)
-    if [ -f lychee.toml ]; then
-        args+=(--config lychee.toml)
+    if [ -f .lychee.toml ]; then
+        args+=(--config .lychee.toml)
     fi
     lychee --no-progress "${args[@]}" .
 
@@ -157,9 +177,9 @@ commits range="": (_banner "lint" "commits")
     # below verify signatures — this is convenience wiring, not enforcement.
     # See https://github.com/andyfeller/gh-ssh-allowed-signers for automation
     # to retrieve contributor keys.
-    if [ -f .limen/allowed_signers ]; then
+    if [ -f .allowed_signers ]; then
         git config --unset-all gpg.ssh.allowedSignersFile 2>/dev/null || true
-        git config --add gpg.ssh.allowedSignersFile .limen/allowed_signers
+        git config --add gpg.ssh.allowedSignersFile .allowed_signers
     fi
     range="{{ range }}"
     if [ -z "$range" ] && [ -n "${GITHUB_BASE_REF:-}" ]; then
