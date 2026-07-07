@@ -1,15 +1,21 @@
-# DO NOT EDIT MANUALLY.
-# This workflow is generic — no project-specific content — and is destined to
-# become part of the canonical baseline limen distributes.
+# build-curl CI (project-specific — this repo builds a C tool, not Go, so it
+# diverges from the canonical baseline ci.yaml). Construction rules are the
+# same: the only marketplace action is GitHub's own checkout pinned by commit
+# SHA; everything else is pinned, checksum-verified shell via aqua + just.
 #
-# Design: minimal GitHub glue around the same tooling every developer runs
-# locally. The only marketplace action is GitHub's own checkout, pinned by
-# commit SHA (a tag can be moved to malicious code; a SHA cannot). Everything
-# else is pinned, checksum-verified shell: aqua installs the repo's tools at
-# the versions aqua.yaml pins, and `just` runs the exact recipes a laptop
-# runs — CI green means the same thing as local green, by construction.
-# Deliberately absent: runner egress filtering — the available options are
-# third-party actions, which this workflow avoids on principle.
+# Two jobs:
+#   lint  — the shared limen lint lane (shell/yaml/just/links/commits), once.
+#   build — every release leg on its NATIVE runner, then `just test <leg>`
+#           smoke-tests the binary it produced (a binary can only be executed
+#           on its own os/arch, so each leg is tested on its matching runner).
+#           This gives the source builds (build-posix) real push/PR coverage
+#           and keeps a broken build or binary from ever reaching a release;
+#           the windows legs also carry the self-verifying import (a Renovate
+#           CFW_PACKAGE bump PR cannot go green on a package that fails to
+#           download or verify).
+#
+# Cost note: the linux/macOS legs are ~full source builds of curl + deps, so
+# this is heavy on every PR. Scope the `build` job to `push` if minutes bite.
 name: ci
 
 on:
@@ -17,75 +23,18 @@ on:
     branches: [main]
   pull_request:
 
-# No default token permissions: each job states what it needs. This workflow
-# only ever reads the repository — it cannot write code, releases, or
-# packages even if a step is compromised.
 permissions: {}
 
-# A superseded run (new push to the same branch/PR) is cancelled, not raced.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# Every run step is bash on every runner: without this, windows defaults to
-# PowerShell, which never sees the git-bash environment setup-aqua prepares
-# (the whole matrix is designed to run the recipes under git-bash). Explicit
-# bash also means `-eo pipefail` everywhere, which the implicit linux/macos
-# default lacks.
 defaults:
   run:
     shell: bash
 
 jobs:
-  verify:
-    strategy:
-      fail-fast: false
-      matrix:
-        # Pinned images, not -latest: a runner bump is a reviewed change.
-        # macOS is not redundant: its /bin/bash is 3.2, the portability floor
-        # the shared recipes target. arm64 (ubuntu-24.04-arm) and windows
-        # cover the rest of the supported release matrix — windows runs the
-        # recipes under git-bash.
-        # These entries are also the default required-status-check contexts of
-        # the canonical limen:main ruleset (defaultRequiredChecks in
-        # internal/github/audit.go) — change the two together, in one release.
-        os: [ubuntu-24.04, ubuntu-24.04-arm, macos-15, windows-2025]
-    runs-on: ${{ matrix.os }}
-    # Generous for the windows leg: those runners are markedly slower, and the
-    # per-GOOS lint recipes now run three legs each.
-    timeout-minutes: 45
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-        with:
-          # The token is not left behind in .git/config: nothing in this
-          # workflow talks to GitHub after checkout.
-          persist-credentials: false
-          # Full history and refs: `just do lint commits` validates the commit
-          # range against the PR's base branch, which a shallow clone lacks.
-          fetch-depth: 0
-
-      - name: Install aqua (pinned, checksum-verified)
-        uses: ./.github/actions/setup-aqua
-
-      - name: Install pinned tools
-        # Link-only: the shims download each tool lazily on first use (and it
-        # is verified against the committed aqua-checksums.json then), so a
-        # job only ever pays for the tools its recipes actually run.
-        run: aqua install --only-link
-
-      - name: Lint
-        run: just lint
-
-      - name: Test
-        run: just test
-
-  # Prove the pinned curl-for-win package: exists on curl.se AND its sigstore
-  # bundle verifies against the vendored key. This is what makes a Renovate
-  # CFW_PACKAGE bump self-verifying — the PR cannot go green on a package
-  # that would fail at release time.
-  import:
+  lint:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
@@ -94,12 +43,45 @@ jobs:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
+          # Full history: `just do lint commits` validates the commit range
+          # against the PR's base branch, which a shallow clone lacks.
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-aqua
+      - run: aqua install --only-link
+      - run: just lint
 
-      - name: Install aqua (pinned, checksum-verified)
-        uses: ./.github/actions/setup-aqua
-
-      - name: Install pinned tools
-        run: aqua install --only-link
-
-      - name: Import and verify the windows packages
-        run: just import-windows
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - leg: linux-amd64
+            runs-on: ubuntu-24.04
+            build: build-posix linux-amd64
+          - leg: linux-arm64
+            runs-on: ubuntu-24.04-arm
+            build: build-posix linux-arm64
+          - leg: mac-arm64
+            runs-on: macos-15
+            build: build-posix mac-arm64
+          - leg: windows-amd64
+            runs-on: windows-2025
+            build: build-windows
+          - leg: windows-arm64
+            runs-on: windows-11-arm
+            build: build-windows
+    name: build (${{ matrix.leg }})
+    runs-on: ${{ matrix.runs-on }}
+    timeout-minutes: 90
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-aqua
+      - run: aqua install --only-link
+      - name: Build
+        run: just ${{ matrix.build }}
+      - name: Smoke-test the native binary
+        run: just test ${{ matrix.leg }}

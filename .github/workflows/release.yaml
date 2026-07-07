@@ -31,6 +31,8 @@ jobs:
   windows:
     # Import, not build: curl-for-win's windows packages ARE the official
     # curl builds — sigstore-verified against the vendored key, repackaged.
+    # No smoke test here (ubuntu can't execute curl.exe); CI runs `just test`
+    # on real windows runners for both arches at the same CFW_PACKAGE.
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
@@ -41,7 +43,7 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/setup-aqua
       - run: aqua install --only-link
-      - run: just import-windows
+      - run: just build-windows
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: dist-windows
@@ -59,6 +61,7 @@ jobs:
       - uses: ./.github/actions/setup-aqua
       - run: aqua install --only-link
       - run: just build-posix linux-amd64
+      - run: just test linux-amd64
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: dist-linux-amd64
@@ -76,13 +79,14 @@ jobs:
       - uses: ./.github/actions/setup-aqua
       - run: aqua install --only-link
       - run: just build-posix linux-arm64
+      - run: just test linux-arm64
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: dist-linux-arm64
           path: build/dist/*.tar.gz
 
   mac:
-    # Universal binary: one job serves both darwin arches.
+    # darwin arm64 only — farcloser dropped Intel Mac support.
     runs-on: macos-15
     timeout-minutes: 90
     permissions:
@@ -93,7 +97,8 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/setup-aqua
       - run: aqua install --only-link
-      - run: just build-posix mac
+      - run: just build-posix mac-arm64
+      - run: just test mac-arm64
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: dist-mac
