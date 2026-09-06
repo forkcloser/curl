@@ -10,8 +10,18 @@
 # digest, via their _versions.sh): their _ci-linux-debian.sh expects to BE in
 # debian — the container wrapper lives in the caller, exactly as in their own
 # workflow. The mac leg runs directly on a macOS machine (their script
-# provisions its homebrew dependencies). Meant for CI runners; the linux legs
-# also run locally anywhere a container runtime exists.
+# provisions its homebrew dependencies).
+#
+# Which container runtime wraps the linux legs depends on the host:
+#   linux  — podman, as on the CI runners (their only container runtime).
+#   macOS  — ossein (farcloser's microVM builder), located through OSSEIN_BIN
+#            (the Justfile resolves it; see there). ossein is not released
+#            yet, so it cannot be aqua-pinned like every other tool, and
+#            limen's hermetic PATH hides any unpinned copy — hence an explicit
+#            variable rather than a PATH lookup. Docker Desktop / OrbStack are
+#            deliberately NOT fallbacks: they are the unpinnable system daemons
+#            ossein exists to replace.
+# The amd64 leg on an arm64 mac runs under Rosetta (ossein --platform).
 #
 # Usage: build-posix.sh {linux-amd64|linux-arm64|mac-arm64}
 
@@ -41,9 +51,9 @@ case "$target" in
   # parser expects; the arch token (x64/a64) scopes the build to the job's
   # native arch — a bare 'linux-musl' config means ALL arches, cross-built
   # through qemu.
-  linux-amd64) config='main-linux-musl-x64' kind='linux' pkgos='linux' ;;
-  linux-arm64) config='main-linux-musl-a64' kind='linux' pkgos='linux' ;;
-  mac-arm64)   config='main-mac-a64'        kind='mac'   pkgos='macos' ;;
+  linux-amd64) config='main-linux-musl-x64' kind='linux' pkgos='linux' platform='linux/amd64' ;;
+  linux-arm64) config='main-linux-musl-a64' kind='linux' pkgos='linux' platform='linux/arm64' ;;
+  mac-arm64)   config='main-mac-a64'        kind='mac'   pkgos='macos' platform='' ;;
   *)           echo "unknown target: $target" >&2; exit 1 ;;
 esac
 
@@ -55,19 +65,42 @@ git -C "$work" checkout --quiet "$CFW_COMMIT"
 
 if [ "$kind" = 'linux' ]; then
   # Mirror their workflow: digest-pinned debian image from _versions.sh, the
-  # tree mounted at its own path, CW_* env passed through. podman on CI
-  # runners; docker works identically for local validation.
-  runtime='podman'
-  command -v podman >/dev/null 2>&1 || runtime='docker'
+  # tree mounted at its own path, CW_* env passed through. Both runtimes take
+  # the same docker-shaped flags, so the invocation differs only in the head.
   (
     cd "$work"
     export CW_CONFIG="$config"
     export CW_REVISION="$CFW_REV"
     # shellcheck source=/dev/null
     . ./_versions.sh
-    "$runtime" run --rm --volume "$(pwd):$(pwd)" --workdir "$(pwd)" \
+    image="${OCI_IMAGE_DEBIAN_TESTING:?_versions.sh did not provide the pinned image}"
+    case "$image" in
+      *@sha256:*) ;;
+      *) echo "refusing to build from an image that is not digest-pinned: ${image}" >&2; exit 1 ;;
+    esac
+
+    runtime=()
+    case "$(uname -s)" in
+      Darwin)
+        ossein="${OSSEIN_BIN:-$(command -v ossein || true)}"
+        if [ -z "$ossein" ] || [ ! -x "$ossein" ]; then
+          echo "no ossein: set OSSEIN_BIN to an ossein binary (build one: cd ../ossein && just build)" >&2
+          exit 1
+        fi
+        # One throwaway microVM for the build. The compile is the whole cost,
+        # so give it the machine by default; both knobs stay overridable.
+        runtime=("$ossein" run --rm --platform "$platform"
+                 --cpus "${OSSEIN_CPUS:-$(sysctl -n hw.ncpu 2>/dev/null || echo 4)}"
+                 --memory "${OSSEIN_MEMORY:-8192}")
+        ;;
+      *)
+        runtime=(podman run --rm)
+        ;;
+    esac
+
+    "${runtime[@]}" --volume "$(pwd):$(pwd)" --workdir "$(pwd)" \
       --env-file <(env | grep -aE '^(CW_|DO_NOT_TRACK)') \
-      "${OCI_IMAGE_DEBIAN_TESTING:?_versions.sh did not provide the pinned image}" \
+      "$image" \
       sh -c ./_ci-linux-debian.sh
   )
 else
