@@ -13,6 +13,11 @@
 #           the windows legs also carry the self-verifying import (a Renovate
 #           CFW_PACKAGE bump PR cannot go green on a package that fails to
 #           download or verify).
+#   gate  — the ONE required status check (the canonical limen:main ruleset
+#           requires `gate`, see defaultRequiredChecks in limen's
+#           internal/github/audit.go). It collapses lint and the whole build
+#           matrix to one stable name, so the ruleset never has to know this
+#           workflow's runner list.
 #
 # Cost note: the linux/macOS legs are ~full source builds of curl + deps, so
 # this is heavy on every PR. Scope the `build` job to `push` if minutes bite.
@@ -85,3 +90,25 @@ jobs:
         run: just ${{ matrix.build }}
       - name: Smoke-test the native binary
         run: just test ${{ matrix.leg }}
+
+  gate:
+    needs: [lint, build]
+    # always(), and the results asserted explicitly: without always() a failed
+    # or cancelled dependency SKIPS this job instead of failing it, and a
+    # skipped required check does not block a merge. `needs.build.result` is
+    # success only when every matrix leg succeeded.
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Lint and every build leg succeeded
+        env:
+          # Via env, never interpolated into the script: the shell sees data,
+          # not something the expression layer can rewrite into code.
+          RESULT_LINT: ${{ needs.lint.result }}
+          RESULT_BUILD: ${{ needs.build.result }}
+        run: |
+          printf 'lint: %s\n' "$RESULT_LINT"
+          printf 'build: %s\n' "$RESULT_BUILD"
+          [ "$RESULT_LINT" = "success" ] && [ "$RESULT_BUILD" = "success" ]
