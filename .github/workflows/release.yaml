@@ -126,7 +126,8 @@ jobs:
         run: cd dist && sha256sum -- *.tar.gz > checksums.txt
       - uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
         with:
-          subject-path: dist/*.tar.gz
+          # Everything published, including checksums.txt — no unattested asset.
+          subject-path: dist/*
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}

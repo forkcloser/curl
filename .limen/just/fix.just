@@ -10,7 +10,7 @@ set quiet
 # Shared private _banner recipe (see lib.just).
 import 'lib.just'
 
-default: limen just yaml
+default: limen just yaml aqua
 
 # limen itself: repair what `just do lint limen` reports — rewrite drifted
 # canonical files, create missing mandatory ones, restore aqua pins and
@@ -32,13 +32,23 @@ just: (_banner "fix" "just")
     # still honoring .gitignore — so a not-yet-staged file is formatted too.
     # Tracked-but-deleted files are skipped (see `lint just` for the rationale:
     # enumeration is git's, truth is the working tree's).
+    # Same pathspecs as `lint just`: literals carry their '**/' twins (git
+    # pathspec literals are case-sensitive and do not match across
+    # directories), and the hidden .justfile spelling is covered.
     while IFS= read -r -d '' f; do
         [ -f "$f" ] || continue
         just --fmt --justfile "$f"
-    done < <(git ls-files -z --cached --others --exclude-standard 'justfile' 'Justfile' '*.just' '**/justfile')
+    done < <(git ls-files -z --cached --others --exclude-standard \
+        'justfile' '**/justfile' 'Justfile' '**/Justfile' '.justfile' '**/.justfile' '*.just')
 
 yaml: (_banner "fix" "yaml")
     yamlfmt -conf .limen/.yamlfmt
+
+# Regenerate aqua-checksums.json from aqua.yaml — the mutating twin of
+# `just do lint aqua` (needs network). In the default set so a plain
+# `just do fix` heals the drift the lint default flags.
+aqua: (_banner "fix" "aqua")
+    aqua --log-level warn update-checksum --prune
 
 # Go fixers live in their own submodule: `just do fix go` runs them all,
 # `just do fix go <recipe>` (e.g. `just do fix go mod`) runs one.
