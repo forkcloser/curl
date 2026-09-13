@@ -14,7 +14,10 @@
   // The update-aqua-checksum workflow pushes a fix-up commit onto Renovate's
   // branches; without this, Renovate treats the branch as human-modified and
   // stops rebasing it.
-  gitIgnoredAuthors: ["41898282+github-actions[bot]@users.noreply.github.com"],
+  gitIgnoredAuthors: [
+    "317468017+limen-ci-forkcloser[bot]@users.noreply.github.com",
+    "41898282+github-actions[bot]@users.noreply.github.com",
+  ],
   customManagers: [
     // CFW_PACKAGE in versions.env: the curl-for-win package this repo tracks,
     // in curl.se's own <curl-version>_<build-rev> form. Watched straight off
