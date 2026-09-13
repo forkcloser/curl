@@ -13,15 +13,10 @@
 # provisions its homebrew dependencies).
 #
 # Which container runtime wraps the linux legs depends on the host:
-#   linux  — podman, as on the CI runners (their only container runtime).
-#   macOS  — ossein (farcloser's microVM builder), located through OSSEIN_BIN
-#            (the Justfile resolves it; see there). ossein is not released
-#            yet, so it cannot be aqua-pinned like every other tool, and
-#            limen's hermetic PATH hides any unpinned copy — hence an explicit
-#            variable rather than a PATH lookup. Docker Desktop / OrbStack are
-#            deliberately NOT fallbacks: they are the unpinnable system daemons
-#            ossein exists to replace.
-# The amd64 leg on an arm64 mac runs under Rosetta (ossein --platform).
+#   linux  — podman, as on the CI runners.
+#   macOS  — docker, from the hermetic PATH like every other tool.
+# Both take the same flags, so the invocation differs only in the head. The
+# amd64 leg on an arm64 mac runs under Rosetta (--platform linux/amd64).
 #
 # Usage: build-posix.sh {linux-amd64|linux-arm64|mac-arm64}
 
@@ -82,16 +77,11 @@ if [ "$kind" = 'linux' ]; then
     runtime=()
     case "$(uname -s)" in
       Darwin)
-        ossein="${OSSEIN_BIN:-$(command -v ossein || true)}"
-        if [ -z "$ossein" ] || [ ! -x "$ossein" ]; then
-          echo "no ossein: set OSSEIN_BIN to an ossein binary (build one: cd ../ossein && just build)" >&2
-          exit 1
-        fi
-        # One throwaway microVM for the build. The compile is the whole cost,
-        # so give it the machine by default; both knobs stay overridable.
-        runtime=("$ossein" run --rm --platform "$platform"
-                 --cpus "${OSSEIN_CPUS:-$(sysctl -n hw.ncpu 2>/dev/null || echo 4)}"
-                 --memory "${OSSEIN_MEMORY:-8192}")
+        # Unsized, the build gets the whole machine; OSSEIN_CPUS and
+        # OSSEIN_MEMORY (docker's units) are overrides only.
+        runtime=(docker run --rm --platform "$platform")
+        [ -z "${OSSEIN_CPUS:-}" ] || runtime+=(--cpus "$OSSEIN_CPUS")
+        [ -z "${OSSEIN_MEMORY:-}" ] || runtime+=(--memory "$OSSEIN_MEMORY")
         ;;
       *)
         runtime=(podman run --rm)
