@@ -1,0 +1,46 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": [
+    "The canonical Renovate configuration is a shared preset \u2014 default.json in the limen repository \u2014 so every repository inherits it by reference and a fix there reaches all of them without a file being re-seeded. The ref is pinned: the `renovate` rule keeps it at the repository's own limen version (the farcloser/limen pin in aqua.yaml), so the preset moves with the release like every other canonical file. limen itself, the preset's author, reads it from its own default branch. Everything below is the project's own \u2014 overrides and additions go here, next to the ref.",
+    "forkProcessing: Renovate skips forked repositories by default under an all-repositories App installation, and it skips them before reading any config beyond this file \u2014 so the setting cannot live in the shared preset, and cannot live in a renovate.json5 either: only the onboarding config file name, renovate.json, is read through the platform API at that point. Every repository that is a GitHub fork is silently never processed without it.",
+    "gitIgnoredAuthors: the update-aqua-checksum workflow pushes a fix-up commit onto Renovate's branches; without this, Renovate treats the branch as human-modified and stops rebasing it. The org's App identity is the org's, so the array stays here (the `renovate` rule maintains it) rather than in the preset.",
+    "customManagers: CFW_PACKAGE in versions.env is the curl-for-win package this repository tracks, in curl.se's own <curl-version>_<build-rev> form, watched straight off the curl.se download index (an HTML page whose hrefs carry the token), so a bump can only propose something actually downloadable. CFW_COMMIT is deliberately not managed: bumping it means re-auditing the build scripts and re-cross-checking the vendored key, human work (see versions.env).",
+    "packageRules/extractVersion: index hrefs look like dl-8.21.0_2/curl-8.21.0_2-win64-mingw.zip; the leading directory component carries the package token."
+  ],
+  "extends": [
+    "github>farcloser/limen#v0.4.0"
+  ],
+  "forkProcessing": "enabled",
+  "gitIgnoredAuthors": [
+    "317468017+limen-ci-forkcloser[bot]@users.noreply.github.com",
+    "300983632+limen-ci-farcloser[bot]@users.noreply.github.com",
+    "41898282+github-actions[bot]@users.noreply.github.com"
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^versions\\.env$/"
+      ],
+      "matchStrings": [
+        "# renovate: depName=(?<depName>[^\\s]+)\\nCFW_PACKAGE=(?<currentValue>[^\\s]+)"
+      ],
+      "datasourceTemplate": "custom.curl-for-win",
+      "versioningTemplate": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)_(?<build>\\d+)$"
+    }
+  ],
+  "customDatasources": {
+    "curl-for-win": {
+      "defaultRegistryUrlTemplate": "https://curl.se/windows/",
+      "format": "html"
+    }
+  },
+  "packageRules": [
+    {
+      "matchDatasources": [
+        "custom.curl-for-win"
+      ],
+      "extractVersion": "^dl-(?<version>\\d+\\.\\d+\\.\\d+_\\d+)/"
+    }
+  ]
+}
