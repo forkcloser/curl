@@ -104,7 +104,13 @@ if [ "$kind" = 'linux' ]; then
       sh -c ./_ci-linux-debian.sh
   )
 else
-  (cd "$work" && CW_CONFIG="$config" CW_REVISION="$CFW_REV" sh -c ./_ci-mac-homebrew.sh)
+  # curl-for-win's mac script provisions its build dependencies with brew,
+  # which the hermetic PATH hides. The Justfile exports BREW_BIN, captured
+  # from the ambient PATH for exactly this; its directory is appended for this
+  # leg only, behind the pinned tools.
+  brew="${BREW_BIN:-$(command -v brew || true)}"
+  [ -n "$brew" ] || { echo "no brew (BREW_BIN is empty): curl-for-win's mac leg needs homebrew" >&2; exit 1; }
+  (cd "$work" && PATH="$PATH:$(dirname "$brew")" CW_CONFIG="$config" CW_REVISION="$CFW_REV" sh -c ./_ci-mac-homebrew.sh)
 fi
 
 # Collect: their packages are curl-<version>[_rev]-<cpu>-<os>.tar.xz in the
