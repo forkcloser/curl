@@ -1,4 +1,4 @@
-# Release lane for build-curl (custom — this repo packages a C project, so
+# Release lane for curl (custom — this repo packages a C project, so
 # the canonical goreleaser lane does not apply; same construction rules:
 # SHA-pinned first-party actions only, minimal per-job permissions, bash
 # everywhere).

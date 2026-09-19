@@ -1,4 +1,4 @@
-# build-curl CI (project-specific — this repo builds a C tool, not Go, so it
+# curl CI (project-specific — this repo builds a C tool, not Go, so it
 # diverges from the canonical baseline ci.yaml). Construction rules are the
 # same: the only marketplace action is GitHub's own checkout pinned by commit
 # SHA; everything else is pinned, checksum-verified shell via aqua + just.
