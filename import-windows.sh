@@ -34,8 +34,8 @@ for arch in amd64 arm64; do
   mkdir -p "$work"
 
   echo "› fetching ${pkg}"
-  curl --proto '=https' --tlsv1.2 -fsSL -o "${work}/${pkg}" "$url"
-  curl --proto '=https' --tlsv1.2 -fsSL -o "${work}/${pkg}.sigstore" "${url}.sigstore"
+  curl --proto '=https' --tlsv1.2 -fsSL --retry 5 --retry-delay 3 --retry-all-errors -o "${work}/${pkg}" "$url"
+  curl --proto '=https' --tlsv1.2 -fsSL --retry 5 --retry-delay 3 --retry-all-errors -o "${work}/${pkg}.sigstore" "${url}.sigstore"
 
   echo "› verifying sigstore bundle against the vendored key"
   cosign verify-blob --key cosign.pub.asc --bundle "${work}/${pkg}.sigstore" "${work}/${pkg}"
