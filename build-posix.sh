@@ -12,11 +12,9 @@
 # workflow. The mac leg runs directly on a macOS machine (their script
 # provisions its homebrew dependencies).
 #
-# Which container runtime wraps the linux legs depends on the host:
-#   linux  — podman, as on the CI runners.
-#   macOS  — docker, from the hermetic PATH like every other tool.
-# Both take the same flags, so the invocation differs only in the head. The
-# amd64 leg on an arm64 mac runs under Rosetta (--platform linux/amd64).
+# The container runtime is `docker`, from the hermetic PATH like every other
+# tool, on every host. The amd64 leg on an arm64 mac runs under Rosetta
+# (--platform linux/amd64).
 #
 # Usage: build-posix.sh {linux-amd64|linux-arm64|mac-arm64}
 
@@ -74,19 +72,11 @@ if [ "$kind" = 'linux' ]; then
       *) echo "refusing to build from an image that is not digest-pinned: ${image}" >&2; exit 1 ;;
     esac
 
-    runtime=()
-    case "$(uname -s)" in
-      Darwin)
-        # Unsized, the build gets the whole machine; OSSEIN_CPUS and
-        # OSSEIN_MEMORY (docker's units) are overrides only.
-        runtime=(docker run --rm --platform "$platform")
-        [ -z "${OSSEIN_CPUS:-}" ] || runtime+=(--cpus "$OSSEIN_CPUS")
-        [ -z "${OSSEIN_MEMORY:-}" ] || runtime+=(--memory "$OSSEIN_MEMORY")
-        ;;
-      *)
-        runtime=(podman run --rm)
-        ;;
-    esac
+    # Unsized, the build gets the whole machine; BUILD_CPUS and BUILD_MEMORY
+    # (docker's units) are overrides only.
+    runtime=(docker run --rm --platform "$platform")
+    [ -z "${BUILD_CPUS:-}" ] || runtime+=(--cpus "$BUILD_CPUS")
+    [ -z "${BUILD_MEMORY:-}" ] || runtime+=(--memory "$BUILD_MEMORY")
 
     "${runtime[@]}" --volume "$(pwd):$(pwd)" --workdir "$(pwd)" \
       --env-file <(env | grep -aE '^(CW_|DO_NOT_TRACK)') \
