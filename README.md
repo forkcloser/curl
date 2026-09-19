@@ -1,4 +1,4 @@
-# build-curl
+# curl
 
 First-party curl packages for the farcloser toolchain — one `curl` for every
 platform, pinned and verified through aqua like everything else. Exists
@@ -68,9 +68,9 @@ committed-pin belt to the attestation's suspenders.
 
 ```yaml
 - type: github_release
-  repo_owner: farcloser
-  repo_name: build-curl
-  description: curl with dependable TLS 1.3, first-party build (farcloser/build-curl)
+  repo_owner: forkcloser
+  repo_name: curl
+  description: curl with dependable TLS 1.3, first-party build (forkcloser/curl)
   asset: curl_{{trimV .Version}}_{{.OS}}_{{.Arch}}.tar.gz
   format: tar.gz
   files:
@@ -87,7 +87,7 @@ committed-pin belt to the attestation's suspenders.
     asset: checksums.txt
     algorithm: sha256
   github_artifact_attestations:
-    signer_workflow: farcloser/build-curl/.github/workflows/release.yaml
+    signer_workflow: forkcloser/curl/.github/workflows/release.yaml
   supported_envs:
     - darwin/arm64   # no darwin/amd64 — Intel Mac support was dropped
     - linux
