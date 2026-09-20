@@ -35,8 +35,10 @@ install), and publishes with a `checksums.txt` for aqua's checksum pinning.
 
 Assets: `curl_<version>_{linux,windows}_{amd64,arm64}.tar.gz` plus
 `curl_<version>_darwin_arm64.tar.gz` (no darwin/amd64), each
-containing the `curl` binary (plus `curl-ca-bundle.crt` on windows, where
-curl expects the CA bundle beside the executable) and the curl `COPYING`.
+containing the `curl` binary and the curl `COPYING`. The windows archives also
+carry `curl-ca-bundle.crt` as curl-for-win packages it, but that build trusts
+the Windows certificate store (`NativeCA`, no `CAcert`) and never loads the
+bundle on its own; it is there for anyone who wants to point `--cacert` at it.
 
 ## Version bumps
 
@@ -97,7 +99,12 @@ committed-pin belt to the attestation's suspenders.
 The authoritative copy of this entry belongs in limen's canonical
 `.limen/aqua-registry.yaml` (so every repo inherits it through a limen
 release), with the curl version pinned in each consumer's `aqua.yaml`; this
-block is what that copy is derived from. Validate it against the **first** cut
-release before relying on it — in particular that `curl.exe` on windows
-resolves `curl-ca-bundle.crt` (shipped beside it in the archive) from aqua's
-install layout.
+block is what that copy is derived from. Validated against v8.21.0 through
+aqua on windows/amd64 and windows/arm64: checksum and attestation verify on
+install, and `curl.exe` from aqua's `pkgs/` layout completes a verified TLS 1.3
+request, trusting the Windows certificate store (it does the same with the
+bundle beside it removed). One thing a windows consumer must get right: in a
+runner's `shell: bash`, Git for Windows' own `/mingw64/bin/curl` sits ahead of
+anything `GITHUB_PATH` appends, so the pinned curl only answers to `curl` when
+aqua's bin is first on PATH (in POSIX form — a `C:/` entry splits at the colon
+inside bash) or when called through the proxy by path.
