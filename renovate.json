@@ -27,7 +27,7 @@
     "packageRules/extractVersion: index hrefs look like dl-8.21.0_2/curl-8.21.0_2-win64-mingw.zip; the leading directory component carries the package token."
   ],
   "extends": [
-    "github>farcloser/limen#v0.4.0"
+    "github>farcloser/limen#v0.5.0"
   ],
   "forkProcessing": "enabled",
   "gitIgnoredAuthors": [
