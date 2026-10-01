@@ -6,6 +6,8 @@ import '.limen/just/main.just'
 # shared default lists everything).
 lint: do::lint::default
 fix: do::fix::default
+# The security workflow runs `just security`.
+security: do::security::default
 
 # Basic sanity test of ONE built binary (build it first): it runs, reports the
 # expected version, and does a TLS 1.3 handshake. Takes the leg (linux-amd64,
