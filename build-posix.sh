@@ -56,6 +56,39 @@ if [ ! -d "$work" ]; then
 fi
 git -C "$work" checkout --quiet "$CFW_COMMIT"
 
+# curl-for-win picks stat's flags by uname (BSD `stat -f` on macOS), while the
+# hermetic PATH's coreutils are GNU on every platform. Send macOS down the GNU
+# branch of its six `bsd|mac)` stat cases. The files are restored first so a
+# rerun patches pristine copies, and any other count stops the build: a
+# CFW_COMMIT bump that moves these cases must not leave them half-patched.
+cfw_stat_files=(curl.sh _pkg.sh _info-bin.sh openssl.sh _sign-code.sh)
+git -C "$work" checkout --quiet "$CFW_COMMIT" -- "${cfw_stat_files[@]}"
+cfw_stat_sites=$(cd "$work" && cat "${cfw_stat_files[@]}" | grep -c 'bsd|mac)' || true)
+if [ "$cfw_stat_sites" -ne 6 ]; then
+  echo "curl-for-win ${CFW_COMMIT} has ${cfw_stat_sites} 'bsd|mac)' cases in ${cfw_stat_files[*]}, not the 6 this patch expects" >&2
+  exit 1
+fi
+for f in "${cfw_stat_files[@]}"; do
+  sed -i.orig 's/bsd|mac)/bsd)/' "$work/$f"
+  rm "$work/$f.orig"
+done
+
+# Its five `mac)` branches that delete a signing or deploy key call BSD
+# `rm -P`, which uutils rm rejects and which has no effect on macOS anyway;
+# the plain `rm -f` after each case deletes the key. The branches go, under
+# the same restore-then-count guard.
+cfw_rm_files=(_build.sh _ul.sh)
+git -C "$work" checkout --quiet "$CFW_COMMIT" -- "${cfw_rm_files[@]}"
+cfw_rm_sites=$(cd "$work" && cat "${cfw_rm_files[@]}" | grep -c 'mac) *rm -f -P --' || true)
+if [ "$cfw_rm_sites" -ne 5 ]; then
+  echo "curl-for-win ${CFW_COMMIT} has ${cfw_rm_sites} 'mac) rm -f -P' cases in ${cfw_rm_files[*]}, not the 5 this patch expects" >&2
+  exit 1
+fi
+for f in "${cfw_rm_files[@]}"; do
+  sed -i.orig '/mac) *rm -f -P --/d' "$work/$f"
+  rm "$work/$f.orig"
+done
+
 if [ "$kind" = 'linux' ]; then
   # Mirror their workflow: digest-pinned debian image from _versions.sh, the
   # tree mounted at its own path, CW_* env passed through. Both runtimes take
