@@ -24,3 +24,6 @@ build-windows:
 # container under docker; mac-arm64 needs a macOS host.
 build-posix target:
     ./build-posix.sh {{ target }}
+
+# --- added by limen fix: the recipe the security workflow runs ---
+security: do::security::default
