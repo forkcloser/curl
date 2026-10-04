@@ -118,7 +118,7 @@ if [ "$kind" = 'linux' ]; then
   )
 else
   # curl-for-win's mac script provisions its build dependencies with brew,
-  # which the hermetic PATH hides. The Justfile exports BREW_BIN, captured
+  # which the hermetic PATH hides. The .justfile exports BREW_BIN, captured
   # from the ambient PATH for exactly this; its directory is appended for this
   # leg only, behind the pinned tools.
   brew="${BREW_BIN:-$(command -v brew || true)}"
