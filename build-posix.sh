@@ -12,8 +12,10 @@
 # workflow. The mac leg runs directly on a macOS machine (their script
 # provisions its homebrew dependencies).
 #
-# The container runtime is `docker`, from the hermetic PATH like every other
-# tool, on every host. The amd64 leg on an arm64 mac runs under Rosetta
+# The container runtime is `docker`. On a Mac it is ossein's, which limen's
+# base tool set puts on the hermetic PATH ahead of any Docker installed there;
+# ossein is darwin/arm64 only, so on a linux host (CI's linux legs) it is the
+# machine's own docker. The amd64 leg on an arm64 mac runs under Rosetta
 # (--platform linux/amd64).
 #
 # Usage: build-posix.sh {linux-amd64|linux-arm64|mac-arm64}

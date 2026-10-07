@@ -20,7 +20,4 @@ packages:
   # --- farcloser tools (local registry; standard once registered upstream) ---
   - name: farcloser/limen@v0.8.0 # renovate: depName=farcloser/limen
     registry: local
-  # ossein provides `docker` for the linux legs of build-posix.sh (see there).
-  - name: farcloser/ossein@v0.3.0 # renovate: depName=farcloser/ossein
-    registry: local
   - import: ../.limen/aqua.yaml
