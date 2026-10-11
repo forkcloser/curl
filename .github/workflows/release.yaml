@@ -86,7 +86,7 @@ jobs:
           path: build/dist/*.tar.gz
 
   mac:
-    # darwin arm64 only — farcloser dropped Intel Mac support.
+    # darwin arm64 only — Intel Mac support was dropped.
     runs-on: macos-15
     timeout-minutes: 90
     permissions:

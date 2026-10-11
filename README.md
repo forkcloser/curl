@@ -1,6 +1,6 @@
 # curl
 
-First-party curl packages for the farcloser toolchain — one `curl` for every
+First-party curl packages for the toolchain — one `curl` for every
 platform, pinned and verified through aqua like everything else. Exists
 because the baseline requires a curl with dependable TLS 1.3 everywhere, and
 no single trustworthy upstream channel covers all our platforms (see
@@ -17,8 +17,8 @@ the curl project's own reproducible-build system:
   cross-checked against the copy embedded in their README at that commit.
 - **linux (amd64, arm64)** — static (musl) builds produced by curl-for-win's
   build scripts at the same audited pin, run in our CI.
-- **macOS (arm64)** — same machinery, `a64` flavor (arm64-only; farcloser
-  dropped Intel Mac support, so no x86_64 slice / universal binary).
+- **macOS (arm64)** — same machinery, `a64` flavor (arm64-only; Intel Mac
+  support was dropped, so no x86_64 slice / universal binary).
 
 All pins live in `versions.env`: the upstream curl version, curl-for-win's
 windows build revision, and the curl-for-win commit (which is also the
