@@ -3,8 +3,8 @@
 # Build the linux (static, musl) and macOS (arm64) curl using curl-for-win's
 # own build system at an audited pin (CFW_COMMIT) — the same machinery that
 # produces the windows packages we import, so every platform shares one build
-# lineage. macOS is arm64-only (a64), not universal: farcloser dropped Intel
-# Mac support, so we don't ship an x86_64 slice.
+# lineage. macOS is arm64-only (a64), not universal: Intel Mac support was
+# dropped, so we don't ship an x86_64 slice.
 #
 # The linux legs run inside the debian container curl-for-win pins (by
 # digest, via their _versions.sh): their _ci-linux-debian.sh expects to BE in
