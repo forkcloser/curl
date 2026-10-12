@@ -1,0 +1,32 @@
+# The toolchain the linux legs build with, pinned by version and digest
+# (book/tooling.md, "Pinned artifacts beyond aqua"). build-posix.sh reads each
+# entry back with `limen pins get <name> url|sha256`, verifies the download
+# against the digest and unpacks the tools the build invokes for the
+# container; Renovate proposes the bumps from the renovate: lines, and
+# `limen pins refresh` recomputes a digest a bump left behind, through LLVM's
+# own release attestation (`gh attestation verify --owner llvm`).
+#
+# An exact LLVM release, not Debian's clang-NN, which keeps only the newest
+# build per major: the compiler is a pin like every other input. One entry per
+# runner arch, the same version in both. The macOS leg builds with Apple's
+# clang (README) and has no entry here. Held on 22 by renovate.json, with
+# ossein-kernel, until a 23.x release is proven to load on trixie.
+pins:
+  - name: llvm-linux-amd64
+    renovate: github-releases llvm/llvm-project
+    extract-version: ^llvmorg-(?<version>[0-9]+\.[0-9]+\.[0-9]+)$
+    version: 22.1.8
+    url: https://github.com/llvm/llvm-project/releases/download/llvmorg-${version}/LLVM-${version}-Linux-X64.tar.xz
+    verify: github-attestation llvm
+    digest:
+      version: 22.1.8
+      sha256: df0e1ecf16caf3489a272a5eea4eec9b0d82878f6477fa309504f918a0006384
+  - name: llvm-linux-arm64
+    renovate: github-releases llvm/llvm-project
+    extract-version: ^llvmorg-(?<version>[0-9]+\.[0-9]+\.[0-9]+)$
+    version: 22.1.8
+    url: https://github.com/llvm/llvm-project/releases/download/llvmorg-${version}/LLVM-${version}-Linux-ARM64.tar.xz
+    verify: github-attestation llvm
+    digest:
+      version: 22.1.8
+      sha256: 805efad2bb91cb4967fa569e0881d10c0f69c04461cf671cccbae19f547acc34

@@ -16,14 +16,21 @@ the curl project's own reproducible-build system:
   and repackages. The key was vendored from the pinned commit and
   cross-checked against the copy embedded in their README at that commit.
 - **linux (amd64, arm64)** — static (musl) builds produced by curl-for-win's
-  build scripts at the same audited pin, run in our CI.
+  `_build.sh` at the same audited pin, run in our CI inside a debian image
+  pinned by digest, with apt from snapshot.debian.org at a pinned timestamp
+  and the compiler from a pinned LLVM release (`pins.yaml`, verified through
+  LLVM's release attestation): every input to a build is a pin, and two runs
+  of one commit see the same packages and the same compiler.
 - **macOS (arm64)** — same machinery, `a64` flavor (arm64-only; Intel Mac
-  support was dropped, so no x86_64 slice / universal binary).
+  support was dropped, so no x86_64 slice / universal binary), built with
+  Apple's clang as curl-for-win builds its own mac packages.
 
-All pins live in `versions.env`: the upstream curl version, curl-for-win's
-windows build revision, and the curl-for-win commit (which is also the
-provenance of the vendored key — bumping it means re-auditing their scripts
-and re-cross-checking the key).
+The pins live in `versions.env` (the upstream curl version, curl-for-win's
+windows build revision, the curl-for-win commit — which is also the
+provenance of the vendored key, so bumping it means re-auditing their scripts
+and re-cross-checking the key — and the linux legs' image, suite and apt
+snapshot) and in `pins.yaml` (the LLVM release). What this repository changes
+about curl-for-win's own scripts is listed, whole, in `UPSTREAM.md`.
 
 ## Releasing
 
