@@ -28,6 +28,12 @@ root="$(pwd -P)"
 # shellcheck source=versions.env disable=SC1091
 . ./versions.env
 CURL_VERSION="${CFW_PACKAGE%_*}"
+# The archives carry the release's version: the tag's (PACKAGE_VERSION,
+# e.g. 8.22.0 or 8.22.0.1 for a rebuild of the same curl) or, by default, the
+# pinned curl's. A tag that names another curl than the pin is refused.
+package_version="${PACKAGE_VERSION:-${CURL_VERSION}}"
+[ "${package_version}" = "${CURL_VERSION}" ] || [ "${package_version%.*}" = "${CURL_VERSION}" ] ||
+  { echo "PACKAGE_VERSION ${package_version} is not the pinned curl ${CURL_VERSION} (${CURL_VERSION} or ${CURL_VERSION}.N)" >&2; exit 1; }
 # The package build-revision (the _N in CFW_PACKAGE) — curl-for-win's
 # CW_REVISION. Feeding it here makes the posix packages carry the SAME rev
 # token as the imported windows ones (one lineage, consistent naming); it is a
@@ -214,7 +220,7 @@ for pkg in "$work"/curl-"${CURL_VERSION}"*-"$pkgos".tar.xz; do
   goos='linux'
   [ "$pkgos" = 'macos' ] && goos='darwin'
 
-  name="curl_${CURL_VERSION}_${goos}_${arch}"
+  name="curl_${package_version}_${goos}_${arch}"
   mkdir -p "build/${name}"
   cp "$bin" "${pkgroot}/COPYING.txt" "build/${name}/"
   tar -czf "${out}/${name}.tar.gz" -C build "$name"

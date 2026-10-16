@@ -43,7 +43,13 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/setup-aqua
       - run: aqua install --only-link
-      - run: just build-windows
+      - name: Build
+        env:
+          # The tag, without its v; a dispatch builds the pinned version.
+          PACKAGE_VERSION: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || '' }}
+        run: |
+          export PACKAGE_VERSION="${PACKAGE_VERSION#v}"
+          just build-windows
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: dist-windows
@@ -60,8 +66,14 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/setup-aqua
       - run: aqua install --only-link
-      - run: just build-posix linux-amd64
-      - run: just test linux-amd64
+      - name: Build and test
+        env:
+          # The tag, without its v; a dispatch builds the pinned version.
+          PACKAGE_VERSION: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || '' }}
+        run: |
+          export PACKAGE_VERSION="${PACKAGE_VERSION#v}"
+          just build-posix linux-amd64
+          just test linux-amd64
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: dist-linux-amd64
@@ -78,8 +90,14 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/setup-aqua
       - run: aqua install --only-link
-      - run: just build-posix linux-arm64
-      - run: just test linux-arm64
+      - name: Build and test
+        env:
+          # The tag, without its v; a dispatch builds the pinned version.
+          PACKAGE_VERSION: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || '' }}
+        run: |
+          export PACKAGE_VERSION="${PACKAGE_VERSION#v}"
+          just build-posix linux-arm64
+          just test linux-arm64
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: dist-linux-arm64
@@ -97,8 +115,14 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/setup-aqua
       - run: aqua install --only-link
-      - run: just build-posix mac-arm64
-      - run: just test mac-arm64
+      - name: Build and test
+        env:
+          # The tag, without its v; a dispatch builds the pinned version.
+          PACKAGE_VERSION: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || '' }}
+        run: |
+          export PACKAGE_VERSION="${PACKAGE_VERSION#v}"
+          just build-posix mac-arm64
+          just test mac-arm64
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: dist-mac
