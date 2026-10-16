@@ -21,7 +21,9 @@ build-windows:
 
 # Build a posix leg (linux-amd64, linux-arm64, mac-arm64) with curl-for-win's
 # machinery at the audited pin. Linux legs run in their digest-pinned debian
-# container under docker; mac-arm64 needs a macOS host.
+# container under docker; mac-arm64 needs a macOS host. PACKAGE_VERSION names
+# the archive (the tag's version, 8.22.0.1 for a rebuild); the default is the
+# pinned curl's.
 build-posix target:
     ./build-posix.sh {{ target }}
 

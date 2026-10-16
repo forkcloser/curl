@@ -16,6 +16,9 @@ cd "$(dirname "$0")"
 # shellcheck source=versions.env disable=SC1091
 . ./versions.env
 curl_version="${CFW_PACKAGE%_*}"
+# The archive carries the release's version (PACKAGE_VERSION, the tag's), by
+# default the pinned curl's, as the build scripts name it.
+package_version="${PACKAGE_VERSION:-${curl_version}}"
 
 case "${1:-}" in
   linux-amd64)   goos='linux'   goarch='amd64' exe='curl' ;;
@@ -26,7 +29,7 @@ case "${1:-}" in
   *) echo "usage: test-binary.sh {linux-amd64|linux-arm64|mac-arm64|windows-amd64|windows-arm64}" >&2; exit 2 ;;
 esac
 
-name="curl_${curl_version}_${goos}_${goarch}"
+name="curl_${package_version}_${goos}_${goarch}"
 archive="build/dist/${name}.tar.gz"
 [ -f "$archive" ] || { echo "no archive to test: ${archive} (build it first)" >&2; exit 1; }
 

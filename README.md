@@ -41,7 +41,8 @@ GitHub Artifact Attestations for every archive (aqua verifies these on
 install), and publishes with a `checksums.txt` for aqua's checksum pinning.
 
 Assets: `curl_<version>_{linux,windows}_{amd64,arm64}.tar.gz` plus
-`curl_<version>_darwin_arm64.tar.gz` (no darwin/amd64), each
+`curl_<version>_darwin_arm64.tar.gz` (no darwin/amd64), `<version>` the tag's
+(the pinned curl's, with a fourth segment for a rebuild of the same curl), each
 containing the `curl` binary and the curl `COPYING`. The windows archives also
 carry `curl-ca-bundle.crt` as curl-for-win packages it, but that build trusts
 the Windows certificate store (`NativeCA`, no `CAcert`) and never loads the

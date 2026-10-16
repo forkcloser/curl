@@ -16,6 +16,12 @@ cd "$(dirname "$0")"
 . ./versions.env
 CURL_VERSION="${CFW_PACKAGE%_*}"
 CFW_REV="${CFW_PACKAGE##*_}"
+# The archives carry the release's version: the tag's (PACKAGE_VERSION,
+# e.g. 8.22.0 or 8.22.0.1 for a rebuild of the same curl) or, by default, the
+# pinned curl's. A tag that names another curl than the pin is refused.
+package_version="${PACKAGE_VERSION:-${CURL_VERSION}}"
+[ "${package_version}" = "${CURL_VERSION}" ] || [ "${package_version%.*}" = "${CURL_VERSION}" ] ||
+  { echo "PACKAGE_VERSION ${package_version} is not the pinned curl ${CURL_VERSION} (${CURL_VERSION} or ${CURL_VERSION}.N)" >&2; exit 1; }
 
 out="build/dist"
 mkdir -p "$out"
@@ -43,7 +49,7 @@ for arch in amd64 arm64; do
   tar -xJf "${work}/${pkg}" -C "$work"
 
   src="${work}/curl-${CURL_VERSION}_${CFW_REV}-${cpu}-mingw"
-  name="curl_${CURL_VERSION}_windows_${arch}"
+  name="curl_${package_version}_windows_${arch}"
   mkdir -p "${work}/${name}"
   # The bundle travels as curl-for-win packages it: this build trusts the
   # Windows certificate store and never loads it on its own, so it is only
