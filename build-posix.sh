@@ -74,6 +74,12 @@ llvm_toolchain() {
   url="$(limen pins get "$name" url)"
   sum="$(limen pins get "$name" sha256)"
   version="$(limen pins get "$name" version)"
+  # This function runs inside a $(…), where bash drops -e, so a lookup that
+  # failed leaves an empty string rather than ending the script.
+  if [ -z "$url" ] || [ -z "$sum" ] || [ -z "$version" ]; then
+    echo "${name}: limen pins get failed; see the errors above" >&2
+    exit 1
+  fi
   dir="${root}/build/llvm/${name}-${sum}"
   if [ -f "${dir}/.unpacked" ]; then
     echo "$dir"
