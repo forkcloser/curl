@@ -1,7 +1,7 @@
 # curl CI (project-specific — this repo builds a C tool, not Go, so it
 # diverges from the canonical baseline ci.yaml). Construction rules are the
 # same: the only marketplace action is GitHub's own checkout pinned by commit
-# SHA; everything else is pinned, checksum-verified shell via aqua + just.
+# SHA; everything else is pinned, checksum-verified shell via hermetic + just.
 #
 # Two jobs:
 #   lint  — the shared limen lint lane (shell/yaml/just/links/commits), once.
@@ -13,14 +13,14 @@
 #           the windows legs also carry the self-verifying import (a Renovate
 #           CFW_PACKAGE bump PR cannot go green on a package that fails to
 #           download or verify).
-#   tools — every aqua pin installs for real (limen's canonical job).
+#   tools — every pin installs for real (limen's canonical job).
 #   gate  — the ONE required status check (the canonical limen:main ruleset
 #           requires `gate`, see defaultRequiredChecks in limen's
 #           internal/github/audit.go). It collapses lint and the whole build
 #           matrix to one stable name, so the ruleset never has to know this
 #           workflow's runner list.
 #
-# From limen's canonical ci.yaml: the aqua store cache on every job, the Go
+# From limen's canonical ci.yaml: the hermetic store cache on every job, the Go
 # caches on lint (its Go-built tools and golangci-lint's cache), and the
 # tools job. Not its fuzz job: there is no Go code here to fuzz.
 #
@@ -63,24 +63,19 @@ jobs:
           # against the PR's base branch, which a shallow clone lacks.
           fetch-depth: 0
 
-      - name: Install aqua (pinned, checksum-verified)
-        uses: ./.github/actions/setup-aqua
+      - name: Install hermetic (pinned, verified)
+        uses: ./.github/actions/setup-hermetic
 
-      # aqua's package store, keyed on the exact pins and per architecture
+      # hermetic's package store, keyed on the exact pins and per architecture
       # (the store holds native binaries). A warm store turns every lazy first
       # use below into a link; the fallback key keeps the tools a pin bump did
       # not touch, and the changed one downloads and verifies as before.
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          path: ${{ env.AQUA_ROOT_DIR }}/pkgs
-          key: aqua-pkgs-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.aqua/aqua.yaml', '.aqua/aqua-checksums.json', '.limen/aqua-registry.yaml') }}
+          path: ${{ env.HERMETIC_ROOT_DIR }}/store/pkgs
+          key: aqua-pkgs-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.hermetic/hermetic.yaml', '.hermetic/aqua-checksums.json', '.limen/hermetic-registry.yaml') }}
           restore-keys: |
             aqua-pkgs-${{ runner.os }}-${{ runner.arch }}-
-
-      - name: Install pinned tools
-        # Link-only: tools download lazily on first use, checksum-verified; a
-        # job pays only for what its recipes run.
-        run: aqua install --only-link
 
       # The Go build and module caches, plus the linter's (build/cache/, see
       # main.just). The per-platform analysis legs compile the whole module
@@ -138,22 +133,19 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install aqua (pinned, checksum-verified)
-        uses: ./.github/actions/setup-aqua
+      - name: Install hermetic (pinned, verified)
+        uses: ./.github/actions/setup-hermetic
 
-      # aqua's package store, keyed on the exact pins and per architecture
+      # hermetic's package store, keyed on the exact pins and per architecture
       # (the store holds native binaries). A warm store turns every lazy first
       # use below into a link; the fallback key keeps the tools a pin bump did
       # not touch, and the changed one downloads and verifies as before.
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          path: ${{ env.AQUA_ROOT_DIR }}/pkgs
-          key: aqua-pkgs-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.aqua/aqua.yaml', '.aqua/aqua-checksums.json', '.limen/aqua-registry.yaml') }}
+          path: ${{ env.HERMETIC_ROOT_DIR }}/store/pkgs
+          key: aqua-pkgs-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.hermetic/hermetic.yaml', '.hermetic/aqua-checksums.json', '.limen/hermetic-registry.yaml') }}
           restore-keys: |
             aqua-pkgs-${{ runner.os }}-${{ runner.arch }}-
-
-      - name: Install pinned tools
-        run: aqua install --only-link
 
       # The linux legs' compiler: the LLVM release pins.yaml pins, unpacked by
       # build-posix.sh to the tools the build runs (~750 MB), keyed on the
@@ -173,7 +165,7 @@ jobs:
   # Every pin resolves. The verify legs link only, and a link verifies
   # nothing: an asset that is missing from a release, or that fails its
   # checksum, would merge green and fail at first use. One linux leg pays for
-  # the real install; aqua's package store is cached on the exact pins, so a
+  # the real install; hermetic's package store is cached on the exact pins, so a
   # warm key costs seconds and a changed pin is always a real install. (The
   # Go-built tools are tools/go.mod directives, built by the verify legs.)
   tools:
@@ -186,19 +178,19 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install aqua (pinned, checksum-verified)
-        uses: ./.github/actions/setup-aqua
+      - name: Install hermetic (pinned, verified)
+        uses: ./.github/actions/setup-hermetic
 
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          path: ${{ env.AQUA_ROOT_DIR }}/pkgs
+          path: ${{ env.HERMETIC_ROOT_DIR }}/store/pkgs
           # The same key as the verify legs', so this job and the linux leg
           # share one store — and no fallback key here: a changed pin must be
           # a real install, which is what this job exists to prove.
-          key: aqua-pkgs-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.aqua/aqua.yaml', '.aqua/aqua-checksums.json', '.limen/aqua-registry.yaml') }}
+          key: aqua-pkgs-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.hermetic/hermetic.yaml', '.hermetic/aqua-checksums.json', '.limen/hermetic-registry.yaml') }}
 
       - name: Install every pinned tool
-        run: aqua install
+        run: hermetic install
 
   gate:
     needs: [lint, build, tools]
