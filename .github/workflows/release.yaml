@@ -41,8 +41,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/setup-aqua
-      - run: aqua install --only-link
+      - uses: ./.github/actions/setup-hermetic
+      - run: hermetic install --only-link
       - name: Build
         env:
           # The tag, without its v; a dispatch builds the pinned version.
@@ -64,8 +64,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/setup-aqua
-      - run: aqua install --only-link
+      - uses: ./.github/actions/setup-hermetic
+      - run: hermetic install --only-link
       - name: Build and test
         env:
           # The tag, without its v; a dispatch builds the pinned version.
@@ -88,8 +88,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/setup-aqua
-      - run: aqua install --only-link
+      - uses: ./.github/actions/setup-hermetic
+      - run: hermetic install --only-link
       - name: Build and test
         env:
           # The tag, without its v; a dispatch builds the pinned version.
@@ -113,8 +113,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/setup-aqua
-      - run: aqua install --only-link
+      - uses: ./.github/actions/setup-hermetic
+      - run: hermetic install --only-link
       - name: Build and test
         env:
           # The tag, without its v; a dispatch builds the pinned version.
