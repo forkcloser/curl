@@ -4,8 +4,13 @@ Repackaging of <https://github.com/curl/curl-for-win> (`main`), the curl project
 reproducible-build system. The windows legs import its official packages; the posix legs
 run its build system at the commit below.
 
-- Built from: [`9d77e31`](https://github.com/curl/curl-for-win/commit/9d77e31ef1efdc599ad88570ec405f620f27e2de), curl-for-win 8.22.0_3, committed 2026-10-04 (`CFW_COMMIT` in `versions.env`)
-- Reviewed through: the same commit, audited 2026-10-05 ([#41](https://github.com/forkcloser/curl/pull/41))
+- Built from: [`f478a7c`](https://github.com/curl/curl-for-win/commit/f478a7cc3c6f6bf00bf0745e3a55a129b8a5ec2b), curl-for-win 8.23.0_1, committed 2026-10-14 (`CFW_COMMIT` in `versions.env`)
+- Reviewed through: the same commit, audited 2026-10-18. The seven commits since `9d77e31` move
+  `_versions.sh` (curl 8.23.0 and its hash; llvm-mingw 20261006, the windows cross toolchain the
+  imported packages are built with), drop the GitHub token `_dl.sh` forwarded to api.github.com,
+  drop `brew update` from `_ci-mac-homebrew.sh` (not run here) and touch their own workflows; the
+  six `bsd|mac)` stat sites and the five `mac) rm -f -P` sites below are where they were, and
+  `cosign.pub.asc` is unchanged. Earlier audit: 2026-10-05 ([#41](https://github.com/forkcloser/curl/pull/41)).
 
 A bump of `CFW_COMMIT` re-audits curl-for-win's scripts and every entry below; nothing
 else about them is changed, in silence or otherwise. Each entry names where the change
