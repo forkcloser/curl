@@ -20,7 +20,15 @@ CFW_REV="${CFW_PACKAGE##*_}"
 # e.g. 8.22.0 or 8.22.0.1 for a rebuild of the same curl) or, by default, the
 # pinned curl's. A tag that names another curl than the pin is refused.
 package_version="${PACKAGE_VERSION:-${CURL_VERSION}}"
-[ "${package_version}" = "${CURL_VERSION}" ] || [ "${package_version%.*}" = "${CURL_VERSION}" ] ||
+# The rebuild segment is digits only: ".rc1", a trailing dot, or a version
+# that merely starts with the pin is refused.
+case "${package_version#"${CURL_VERSION}"}" in
+  "") ;;
+  . | .*[!0-9]*) package_version_ok="" ;;
+  .*) ;;
+  *) package_version_ok="" ;;
+esac
+[ "${package_version_ok-set}" = "set" ] ||
   { echo "PACKAGE_VERSION ${package_version} is not the pinned curl ${CURL_VERSION} (${CURL_VERSION} or ${CURL_VERSION}.N)" >&2; exit 1; }
 
 out="build/dist"
