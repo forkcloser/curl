@@ -4,7 +4,8 @@
 # against the digest and unpacks the tools the build invokes for the
 # container; Renovate proposes the bumps from the renovate: lines, and
 # `limen pins refresh` recomputes a digest a bump left behind, through LLVM's
-# own release attestation (`gh attestation verify --owner llvm`).
+# own release attestation, held to the signing workflow by name: a workflow
+# renamed there fails the next refresh, closed.
 #
 # An exact LLVM release, not Debian's clang-NN, which keeps only the newest
 # build per major: the compiler is a pin like every other input. One entry per
@@ -17,7 +18,7 @@ pins:
     extract-version: ^llvmorg-(?<version>[0-9]+\.[0-9]+\.[0-9]+)$
     version: 22.1.8
     url: https://github.com/llvm/llvm-project/releases/download/llvmorg-${version}/LLVM-${version}-Linux-X64.tar.xz
-    verify: github-attestation llvm
+    verify: github-attestation llvm/llvm-project llvm/llvm-project/.github/workflows/release-binaries.yml
     digest:
       version: 22.1.8
       sha256: df0e1ecf16caf3489a272a5eea4eec9b0d82878f6477fa309504f918a0006384
@@ -26,7 +27,7 @@ pins:
     extract-version: ^llvmorg-(?<version>[0-9]+\.[0-9]+\.[0-9]+)$
     version: 22.1.8
     url: https://github.com/llvm/llvm-project/releases/download/llvmorg-${version}/LLVM-${version}-Linux-ARM64.tar.xz
-    verify: github-attestation llvm
+    verify: github-attestation llvm/llvm-project llvm/llvm-project/.github/workflows/release-binaries.yml
     digest:
       version: 22.1.8
       sha256: 805efad2bb91cb4967fa569e0881d10c0f69c04461cf671cccbae19f547acc34
