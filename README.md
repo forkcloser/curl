@@ -43,7 +43,10 @@ install), and publishes with a `checksums.txt` for aqua's checksum pinning.
 Assets: `curl_<version>_{linux,windows}_{amd64,arm64}.tar.gz` plus
 `curl_<version>_darwin_arm64.tar.gz` (no darwin/amd64), `<version>` the tag's
 (the pinned curl's, with a fourth segment for a rebuild of the same curl), each
-containing the `curl` binary and the curl `COPYING`. No archive carries a CA
+containing the `curl` binary, the curl `COPYING`, curl-for-win's
+`BUILD-MANIFEST.txt` (the libraries that curl links, statically, and their
+versions) and each of those libraries' licence under `licenses/<library>/`,
+as curl-for-win's own package carries them. No archive carries a CA
 bundle: the windows build trusts the Windows certificate store (`NativeCA`, no
 `CAcert`), and curl-for-win stopped packaging `curl-ca-bundle.crt` for windows
 with 8.23.0_3, so the windows archives no longer hold one.

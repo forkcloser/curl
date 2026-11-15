@@ -232,6 +232,8 @@ for pkg in "$work"/curl-"${CURL_VERSION}"*-"$pkgos".tar.xz; do
   name="curl_${package_version}_${goos}_${arch}"
   mkdir -p "build/${name}"
   cp "$bin" "${pkgroot}/COPYING.txt" "build/${name}/"
+  # The libraries the binary links travel with it, each with its terms.
+  ./licences.sh "${pkgroot}" "build/${name}"
   tar -czf "${out}/${name}.tar.gz" -C build "$name"
   echo "✓ ${out}/${name}.tar.gz"
 done

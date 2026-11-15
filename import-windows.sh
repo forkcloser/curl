@@ -53,6 +53,8 @@ for arch in amd64 arm64; do
   # No CA bundle: curl-for-win stopped packaging one for windows, where this
   # build trusts the Windows certificate store. COPYING is the license.
   cp "${src}/bin/curl.exe" "${src}/COPYING.txt" "${work}/${name}/"
+  # The libraries the binary links travel with it, each with its terms.
+  ./licences.sh "${src}" "${work}/${name}"
   tar -czf "${out}/${name}.tar.gz" -C "$work" "$name"
   echo "✓ ${out}/${name}.tar.gz"
 done
