@@ -1,7 +1,8 @@
 # curl CI (project-specific — this repo builds a C tool, not Go, so it
 # diverges from the canonical baseline ci.yaml). Construction rules are the
-# same: the only marketplace action is GitHub's own checkout pinned by commit
-# SHA; everything else is pinned, checksum-verified shell via hermetic + just.
+# same: the only marketplace actions are GitHub's own (checkout, cache,
+# upload-artifact), pinned by commit SHA; everything else is pinned,
+# checksum-verified shell via hermetic + just.
 #
 # Two jobs:
 #   lint  — the shared limen lint lane (shell/yaml/just/links/commits), once.
@@ -161,6 +162,15 @@ jobs:
         run: just ${{ matrix.build }}
       - name: Smoke-test the native binary
         run: just test ${{ matrix.leg }}
+      # Kept a week: two runs of one commit are compared from these, and a
+      # red smoke test is read from the archive it failed on.
+      - if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dist-${{ matrix.leg }}
+          path: build/dist/*.tar.gz
+          retention-days: 7
+          if-no-files-found: ignore
 
   # Every pin resolves. The verify legs link only, and a link verifies
   # nothing: an asset that is missing from a release, or that fails its
