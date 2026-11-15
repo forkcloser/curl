@@ -4,13 +4,28 @@ Repackaging of <https://github.com/curl/curl-for-win> (`main`), the curl project
 reproducible-build system. The windows legs import its official packages; the posix legs
 run its build system at the commit below.
 
-- Built from: [`f478a7c`](https://github.com/curl/curl-for-win/commit/f478a7cc3c6f6bf00bf0745e3a55a129b8a5ec2b), curl-for-win 8.23.0_1, committed 2026-10-14 (`CFW_COMMIT` in `versions.env`)
-- Reviewed through: the same commit, audited 2026-10-18. The seven commits since `9d77e31` move
-  `_versions.sh` (curl 8.23.0 and its hash; llvm-mingw 20261006, the windows cross toolchain the
-  imported packages are built with), drop the GitHub token `_dl.sh` forwarded to api.github.com,
-  drop `brew update` from `_ci-mac-homebrew.sh` (not run here) and touch their own workflows; the
-  six `bsd|mac)` stat sites and the five `mac) rm -f -P` sites below are where they were, and
-  `cosign.pub.asc` is unchanged. Earlier audit: 2026-10-05 ([#41](https://github.com/forkcloser/curl/pull/41)).
+- Built from: [`f21b050`](https://github.com/curl/curl-for-win/commit/f21b0503e7266a3dbf880b9e2c2eb49b4ff5dd6e), curl-for-win 8.23.0_9, committed 2026-11-11 (`CFW_COMMIT` in `versions.env`); its title says 8.23.0_8, its `_versions.sh` has `_REV` 9
+- Reviewed through: the same commit, audited 2026-11-14. The 99 commits since `f478a7c`:
+  - `_versions.sh`: LibreSSL 4.3.3 to 4.4.1, nghttp2 1.70.0 to 1.71.0, nghttp3 1.18.0 to 1.19.0,
+    ngtcp2 1.25.0 to 1.26.0, brotli 1.2.0 to 1.2.1 (upstream's title names a CVE fix), c-ares
+    1.34.8 to 1.34.9, zlib 1.3.2 to 1.4 and the public suffix list, each with its hash; curl
+    stays 8.23.0.
+  - `_dl.sh`: the windows packages no longer carry a CA bundle (`certdata` is left out for
+    `win` as it was for `mac`), and `certdata.txt` comes from mozilla/nss, not the Firefox tree.
+  - `curl.patch`, new, applied to curl's sources on every platform: `mk-ca-bundle.pl`, and in
+    `lib/vtls/openssl.c` a filter in `ossl_win_load_store`, windows-only code.
+  - `curl.sh`: LDAP is no longer disabled on macOS (the system's library); `CURL_DISABLE_SRP`
+    and `-lpthread` go; `--no-warn-unused-cli` stays on trixie, `-Wno-unused-cli` elsewhere.
+  - `_build.sh`: `-Werror=unused-cli` for every CMake run, `-Wno-dev` kept on trixie; the macOS
+    deployment target from 10.14 to 11.00; the C++ flags and header paths now set for
+    BoringSSL and AWS-LC builds alone (not built here); `pip` for windows builds on a mac host.
+  - `_ci-linux-debian.sh` (not run here, mirrored below): `linux-headers` only for OpenSSL
+    builds; `build-posix-container.sh` drops it.
+  - The rest is BoringSSL, AWS-LC, OpenSSL, c-ares, libssh, trurl and their own workflows.
+
+  The six `bsd|mac)` stat sites and the five `mac) rm -f -P` sites below are where they were, and
+  `cosign.pub.asc` is unchanged. Earlier audits: 2026-10-18 at `f478a7c`, 2026-10-05
+  ([#41](https://github.com/forkcloser/curl/pull/41)).
 
 A bump of `CFW_COMMIT` re-audits curl-for-win's scripts and every entry below; nothing
 else about them is changed, in silence or otherwise. Each entry names where the change
