@@ -221,6 +221,10 @@ for pkg in "$work"/curl-"${CURL_VERSION}"*-"$pkgos".tar.xz; do
   bin="$(find "$extract" -type f -name curl -path '*/bin/*' | head -n 1)"
   [ -n "$bin" ] || { echo "no curl binary inside $(basename "$pkg")" >&2; exit 1; }
   pkgroot="$(dirname "$(dirname "$bin")")"
+  # One release, one set of libraries: what CFW_COMMIT built here against
+  # what CFW_PACKAGE is on windows.
+  [ -f "${pkgroot}/BUILD-MANIFEST.txt" ] || { echo "no BUILD-MANIFEST.txt inside $(basename "$pkg")" >&2; exit 1; }
+  ./check-dependencies.sh "${root}/${pkgroot}/BUILD-MANIFEST.txt"
 
   # Map their package cpu token to our arch name. No universal case: mac is
   # built a64-only (see the config above), so every package is single-arch.
