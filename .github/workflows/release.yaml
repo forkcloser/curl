@@ -158,7 +158,8 @@ jobs:
         run: just release-assets dist
       - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
-          # Everything published, including checksums.txt — no unattested asset.
+          # Everything published but checksums.txt.sigstore.json, which is
+          # itself the signature over checksums.txt.
           subject-path: |
             dist/*.tar.gz
             dist/*.sbom.json
