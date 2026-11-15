@@ -98,6 +98,16 @@ while read -r library; do
   libraries=$((libraries + 1))
 done < <(./licences.sh --libraries "${manifest}")
 [ "${libraries}" -gt 0 ] || { echo "the archive's manifest names no library" >&2; exit 1; }
+# And the notices of their sources: a part for every directory of every
+# library the manifest names, by the list the build itself works from.
+notices="${work}/${name}/licenses/NOTICES"
+[ -s "${notices}" ] || { echo "no licenses/NOTICES in the archive" >&2; exit 1; }
+parts=0
+while read -r part; do
+  grep -qxF -- "${part}" "${notices}" || { echo "NOTICES has no part for ${part}" >&2; exit 1; }
+  parts=$((parts + 1))
+done < <(./archive-notices.sh --parts "${manifest}")
+[ "${parts}" -gt 0 ] || { echo "the manifest names no library with a source to read" >&2; exit 1; }
 # And what the binary itself reports linking is in that manifest: its TLS
 # library, by the name curl prints.
 "$bin" --version | head -n1 | grep -q 'LibreSSL/' || { echo "curl no longer reports LibreSSL: revisit this check" >&2; exit 1; }

@@ -54,7 +54,14 @@ Assets: `curl_<version>_{linux,windows}_{amd64,arm64}.tar.gz` plus
 containing the `curl` binary, the curl `COPYING`, curl-for-win's
 `BUILD-MANIFEST.txt` (the libraries that curl links, statically, and their
 versions) and each of those libraries' licence under `licenses/<library>/`,
-as curl-for-win's own package carries them.
+as curl-for-win's own package carries them, and `licenses/NOTICES`, the
+notices those libraries' sources state, one of each: a project's licence
+file is its summary and can be short of what its sources ask to be
+reproduced (LibreSSL's is two texts and a sentence, where its sources carry
+hundreds of notices of their own). `archive-notices.sh` fetches each source
+the manifest names, verified against the hash curl-for-win itself builds
+from, and `notices.sh` reads the notices out; terms it does not know stop
+the build.
 
 No archive carries a CA bundle as a file, and what a curl trusts is not the
 same on every platform:
