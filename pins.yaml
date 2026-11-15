@@ -21,6 +21,7 @@ pins:
     verify: github-attestation llvm/llvm-project llvm/llvm-project/.github/workflows/release-binaries.yml
     digest:
       version: 22.1.8
+      source: a0facab7b4fa720eb39bdc0c20ba71fb3790446a0eb2ff251d7b34a797278c00
       sha256: df0e1ecf16caf3489a272a5eea4eec9b0d82878f6477fa309504f918a0006384
   - name: llvm-linux-arm64
     renovate: github-releases llvm/llvm-project
@@ -30,4 +31,5 @@ pins:
     verify: github-attestation llvm/llvm-project llvm/llvm-project/.github/workflows/release-binaries.yml
     digest:
       version: 22.1.8
+      source: 8636f8929c9d2d358b161a6c807e54d90da1c04924c52682389c766fba3343f2
       sha256: 805efad2bb91cb4967fa569e0881d10c0f69c04461cf671cccbae19f547acc34
