@@ -9,7 +9,10 @@ run its build system at the commit below.
   - `_versions.sh`: LibreSSL 4.3.3 to 4.4.1, nghttp2 1.70.0 to 1.71.0, nghttp3 1.18.0 to 1.19.0,
     ngtcp2 1.25.0 to 1.26.0, brotli 1.2.0 to 1.2.1 (upstream's title names a CVE fix), c-ares
     1.34.8 to 1.34.9, zlib 1.3.2 to 1.4 and the public suffix list, each with its hash; curl
-    stays 8.23.0.
+    stays 8.23.0. And the root certificates: `CERTDATA_VER_` from 2026-09-08 (`f6dd015`) to
+    2026-11-05 (`30e59d4`). The linux curl embeds the bundle made from that file
+    (`CURL_CA_EMBED`, set where the target is neither mac nor windows), so the set of roots a
+    linux consumer trusts moved with this bump.
   - `_dl.sh`: the windows packages no longer carry a CA bundle (`certdata` is left out for
     `win` as it was for `mac`), and `certdata.txt` comes from mozilla/nss, not the Firefox tree.
   - `curl.patch`, new, applied to curl's sources on every platform: `mk-ca-bundle.pl`, and in
