@@ -25,7 +25,7 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 root="$(pwd -P)"
-# shellcheck source=versions.env disable=SC1091
+# shellcheck source=versions.env
 . ./versions.env
 CURL_VERSION="${CFW_PACKAGE%_*}"
 # The archives carry the release's version: the tag's (PACKAGE_VERSION,

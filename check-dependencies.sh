@@ -21,7 +21,7 @@ built=${1:?the BUILD-MANIFEST.txt of the built package}
 windows=${2:-}
 
 cd "$(dirname "$0")"
-# shellcheck source=versions.env disable=SC1091
+# shellcheck source=versions.env
 . ./versions.env
 
 if [ -z "${windows}" ]; then

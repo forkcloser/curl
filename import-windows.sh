@@ -12,7 +12,7 @@
 set -euo pipefail
 
 cd "$(dirname "$0")"
-# shellcheck source=versions.env disable=SC1091
+# shellcheck source=versions.env
 . ./versions.env
 CURL_VERSION="${CFW_PACKAGE%_*}"
 CFW_REV="${CFW_PACKAGE##*_}"
