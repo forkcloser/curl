@@ -67,6 +67,33 @@ same on every platform:
   package carries it, `licenses/certdata/LICENSE.desktop`, a link to the
   text.
 
+## Verifying a release
+
+A release is the five archives, an SPDX SBOM beside each
+(`<archive>.sbom.json`), `checksums.txt` over those ten files, and
+`checksums.txt.sigstore.json`, cosign's keyless signature over it. Each
+archive, each SBOM and `checksums.txt` has a GitHub Artifact Attestation,
+signed by this repository's release workflow (the signature file has none:
+it is itself what vouches for `checksums.txt`). The same command covers the
+eleven:
+
+```sh
+gh attestation verify curl_<version>_linux_amd64.tar.gz --repo forkcloser/curl
+```
+
+The keyless signature over `checksums.txt`, for a verifier with cosign and
+no `gh`:
+
+```sh
+cosign verify-blob checksums.txt --bundle checksums.txt.sigstore.json \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  --certificate-identity-regexp '^https://github.com/forkcloser/curl/\.github/workflows/release\.yaml@'
+sha256sum -c --ignore-missing checksums.txt
+```
+
+`--ignore-missing` checks the files that are there; without it, every one of
+the ten that was not downloaded is a failure.
+
 ## Version bumps
 
 Renovate watches the curl.se download index directly (a custom HTML
