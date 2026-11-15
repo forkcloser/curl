@@ -46,9 +46,40 @@ echo "› $("$bin" --version | head -n1)"
   || { echo "version mismatch (want ${curl_version})" >&2; exit 1; }
 
 # 2. TLS 1.3 — this repository's whole reason for existing. --tlsv1.3 sets the FLOOR,
-# so a completed, verified request proves 1.3 was negotiated. The CA trust
-# store is the host's to provide (not shipped here).
+# so a completed, verified request proves 1.3 was negotiated, against the
+# roots this platform's curl trusts (2b).
 "$bin" --tlsv1.3 --silent --show-error --fail --output /dev/null https://github.com
+
+# 2b. What the curl trusts is what the README says of its platform: roots
+# inside the linux binary, with the file they came from on the manifest's
+# certdata line, used when nothing names others and set aside when the
+# environment does; the system's on macOS and the store's on windows, nothing
+# embedded and no such line.
+embedded="$("$bin" --dump-ca-embed | grep -c 'BEGIN CERTIFICATE' || true)"
+case "$goos" in
+  linux)
+    [ "$embedded" -gt 0 ] || { echo "the linux curl embeds no root certificate" >&2; exit 1; }
+    grep -q '^certdata ' "${work}/${name}/BUILD-MANIFEST.txt" || { echo "the manifest has no certdata line for the roots the linux curl embeds" >&2; exit 1; }
+    # With none of the three variables, the embedded roots are all there is
+    # to verify with; with one naming a file that holds no root, nothing is.
+    env -u CURL_CA_BUNDLE -u SSL_CERT_FILE -u SSL_CERT_DIR "$bin" --tlsv1.3 --silent --show-error --fail --output /dev/null https://github.com ||
+      { echo "the linux curl does not verify with its embedded roots alone" >&2; exit 1; }
+    : > "${work}/no-roots.pem"
+    for variable in CURL_CA_BUNDLE SSL_CERT_FILE; do
+      if env -u CURL_CA_BUNDLE -u SSL_CERT_FILE -u SSL_CERT_DIR "${variable}=${work}/no-roots.pem" "$bin" --tlsv1.3 --silent --output /dev/null https://github.com; then
+        echo "the linux curl verified with ${variable} naming a file that holds no root: the README says the variable replaces the embedded roots" >&2
+        exit 1
+      fi
+    done
+    ;;
+  *)
+    feature='NativeCA'
+    [ "$goos" != darwin ] || feature='AppleSecTrust'
+    "$bin" --version | grep -q "^Features:.* ${feature}" || { echo "curl does not report ${feature}: revisit the README's account of what it trusts" >&2; exit 1; }
+    [ "$embedded" -eq 0 ] || { echo "the ${goos} curl embeds ${embedded} root certificates, the README says none" >&2; exit 1; }
+    ! grep -q '^certdata ' "${work}/${name}/BUILD-MANIFEST.txt" || { echo "the ${goos} manifest has a certdata line, the README says no roots are embedded" >&2; exit 1; }
+    ;;
+esac
 
 # 3. The archive says what its curl links, and carries each library's terms:
 # the manifest curl-for-win wrote, and for every library it names a licence

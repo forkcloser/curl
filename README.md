@@ -46,10 +46,26 @@ Assets: `curl_<version>_{linux,windows}_{amd64,arm64}.tar.gz` plus
 containing the `curl` binary, the curl `COPYING`, curl-for-win's
 `BUILD-MANIFEST.txt` (the libraries that curl links, statically, and their
 versions) and each of those libraries' licence under `licenses/<library>/`,
-as curl-for-win's own package carries them. No archive carries a CA
-bundle: the windows build trusts the Windows certificate store (`NativeCA`, no
-`CAcert`), and curl-for-win stopped packaging `curl-ca-bundle.crt` for windows
-with 8.23.0_3, so the windows archives no longer hold one.
+as curl-for-win's own package carries them.
+
+No archive carries a CA bundle as a file, and what a curl trusts is not the
+same on every platform:
+
+- **windows**: the Windows certificate store (`NativeCA` among the features
+  `curl --version` prints, no `CAcert`). curl-for-win stopped packaging
+  `curl-ca-bundle.crt` for windows with 8.23.0_3.
+- **macOS**: the system's trust (`AppleSecTrust`). Nothing is embedded.
+- **linux**: Mozilla's roots, inside the binary (curl's CA embed;
+  `curl --dump-ca-embed` prints them). They are used unless something names
+  others: `--cacert` or `--capath`, or one of `CURL_CA_BUNDLE`,
+  `SSL_CERT_FILE` and `SSL_CERT_DIR` in the environment, which a host or a
+  CI job may export for every program. They are the roots of the
+  day curl-for-win pinned them and move only with a release of this
+  repository: the linux archive's `BUILD-MANIFEST.txt` gives that day and
+  the exact file on its `certdata` line (2026-11-05 at curl-for-win
+  8.23.0_9). Their licence, MPL 2.0, is in the archive as curl-for-win's
+  package carries it, `licenses/certdata/LICENSE.desktop`, a link to the
+  text.
 
 ## Version bumps
 
