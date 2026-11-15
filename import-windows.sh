@@ -55,6 +55,6 @@ for arch in amd64 arm64; do
   cp "${src}/bin/curl.exe" "${src}/COPYING.txt" "${work}/${name}/"
   # The libraries the binary links travel with it, each with its terms.
   ./licences.sh "${src}" "${work}/${name}"
-  tar -czf "${out}/${name}.tar.gz" -C "$work" "$name"
+  ./archive.sh "$work" "$name" "${out}/${name}.tar.gz"
   echo "✓ ${out}/${name}.tar.gz"
 done
