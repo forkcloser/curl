@@ -59,10 +59,9 @@ for arch in amd64 arm64; do
   src="${work}/curl-${CURL_VERSION}_${CFW_REV}-${cpu}-mingw"
   name="curl_${package_version}_windows_${arch}"
   mkdir -p "${work}/${name}"
-  # The bundle travels as curl-for-win packages it: this build trusts the
-  # Windows certificate store and never loads it on its own, so it is only
-  # there for a `--cacert`. COPYING is the license.
-  cp "${src}/bin/curl.exe" "${src}/bin/curl-ca-bundle.crt" "${src}/COPYING.txt" "${work}/${name}/"
+  # No CA bundle: curl-for-win stopped packaging one for windows, where this
+  # build trusts the Windows certificate store. COPYING is the license.
+  cp "${src}/bin/curl.exe" "${src}/COPYING.txt" "${work}/${name}/"
   tar -czf "${out}/${name}.tar.gz" -C "$work" "$name"
   echo "✓ ${out}/${name}.tar.gz"
 done

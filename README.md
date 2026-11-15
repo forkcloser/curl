@@ -43,10 +43,10 @@ install), and publishes with a `checksums.txt` for aqua's checksum pinning.
 Assets: `curl_<version>_{linux,windows}_{amd64,arm64}.tar.gz` plus
 `curl_<version>_darwin_arm64.tar.gz` (no darwin/amd64), `<version>` the tag's
 (the pinned curl's, with a fourth segment for a rebuild of the same curl), each
-containing the `curl` binary and the curl `COPYING`. The windows archives also
-carry `curl-ca-bundle.crt` as curl-for-win packages it, but that build trusts
-the Windows certificate store (`NativeCA`, no `CAcert`) and never loads the
-bundle on its own; it is there for anyone who wants to point `--cacert` at it.
+containing the `curl` binary and the curl `COPYING`. No archive carries a CA
+bundle: the windows build trusts the Windows certificate store (`NativeCA`, no
+`CAcert`), and curl-for-win stopped packaging `curl-ca-bundle.crt` for windows
+with 8.23.0_3, so the windows archives no longer hold one.
 
 ## Version bumps
 
@@ -58,14 +58,24 @@ sigstore bundle verifies against the vendored key. Merging and tagging stay
 human acts, as does `CFW_COMMIT` (bumping the build-script pin means
 re-auditing the scripts and re-cross-checking the key — never automated).
 
-Manual bump, when needed: edit `CFW_PACKAGE`, run `just build-windows` to
-prove it, then commit, tag, push.
+**The two pins move together, on every bump.** `CFW_PACKAGE` is what the
+windows legs import; `CFW_COMMIT` is the curl-for-win commit whose scripts the
+linux and mac legs build with, and its `_versions.sh` names curl and every
+library. A new curl version is a new commit, and so is a new package revision
+of the same curl: each revision since the first is a library bump (8.23.0_1
+to 8.23.0_9 moved LibreSSL, nghttp2, nghttp3, ngtcp2 and brotli). `CFW_PACKAGE`
+moved alone would release a windows curl on the new libraries and a linux and
+mac curl on the old ones, under one version.
 
-Note the coupling: curl-for-win's tree hardcodes the curl version it builds,
-so a **curl version bump needs both pins moved together** — `CFW_PACKAGE`
-(Renovate's PR) *and* `CFW_COMMIT` (the human audit). A mismatch cannot ship:
-the posix legs collect artifacts by version glob and fail loudly when the
-pinned scripts built something other than `CFW_PACKAGE` says.
+So Renovate's pull request, which moves `CFW_PACKAGE` alone, is the notice of
+a bump and never the bump: its linux and mac legs are red by construction.
+`check-dependencies.sh` holds each package those legs build to the windows
+package's `BUILD-MANIFEST.txt` and fails on a library at another version, as
+the collection by version glob fails on another curl. The bump is a pull
+request that moves both lines, `CFW_COMMIT` to the commit that built the
+package (the one whose `_versions.sh` has that revision as `_REV`), with the
+audit `UPSTREAM.md` records. Renovate cannot make it: no datasource maps a
+package to its commit, and the audit is not its to do.
 
 ## Consuming these packages (aqua)
 

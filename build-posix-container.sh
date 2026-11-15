@@ -18,8 +18,7 @@ suite="${DEBIAN_SUITE:?the apt suite of the image, e.g. trixie}"
 snapshot="${APT_SNAPSHOT:?a snapshot.debian.org timestamp, e.g. 20261003T204240Z}"
 
 case "$(uname -m)" in
-  x86_64)  headers='linux-headers-amd64' ;;
-  aarch64) headers='linux-headers-arm64' ;;
+  x86_64 | aarch64) ;;
   *) echo "no linux leg builds on $(uname -m)" >&2; exit 1 ;;
 esac
 
@@ -52,7 +51,7 @@ apt-get --option Dpkg::Use-Pty=0 --yes --quiet update
 apt-get --option Dpkg::Use-Pty=0 --yes --quiet install --no-install-suggests --no-install-recommends \
   curl ca-certificates git gpg gpg-agent patch rsync make cmake ninja-build \
   zip xz-utils time jq secure-delete \
-  checksec musl musl-dev "${headers}" python3 libxml2
+  checksec musl musl-dev python3 libxml2
 
 export PATH="/opt/llvm/bin:${PATH}"
 # _build.sh appends CW_CCSUFFIX to every tool name (clang${CW_CCSUFFIX}); the
