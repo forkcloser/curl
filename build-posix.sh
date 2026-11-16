@@ -234,8 +234,10 @@ for pkg in "$work"/curl-"${CURL_VERSION}"*-"$pkgos".tar.xz; do
   rm -rf "build/${name:?}"
   mkdir -p "build/${name}"
   cp "$bin" "${pkgroot}/COPYING.txt" "build/${name}/"
-  # The libraries the binary links travel with it, each with its terms.
+  # The libraries the binary links travel with it, each with its terms, and
+  # with the notices its sources ask to be reproduced.
   ./licences.sh "${pkgroot}" "build/${name}"
+  ./archive-notices.sh "build/${name}"
   ./archive.sh build "$name" "${out}/${name}.tar.gz"
   echo "✓ ${out}/${name}.tar.gz"
 done

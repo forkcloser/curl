@@ -4,7 +4,7 @@ import '.limen/just/main.just'
 
 # The FIRST recipe defined here becomes `just`'s default (until then, the
 # shared default lists everything).
-lint: do::lint::default package-version-test archive-test
+lint: do::lint::default package-version-test archive-test notices-test
 fix: do::fix::default
 
 # The rule that holds a tag to the pinned curl, over its edges.
@@ -14,6 +14,10 @@ package-version-test:
 # One tree archived two ways is one archive.
 archive-test:
     ./archive.sh --test
+
+# What has to stop the notices' build, and what must not.
+notices-test:
+    ./notices.sh --test
 
 # Basic sanity test of ONE built binary (build it first): it runs, reports the
 # expected version, and does a TLS 1.3 handshake. Takes the leg (linux-amd64,
