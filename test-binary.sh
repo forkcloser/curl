@@ -98,6 +98,15 @@ while read -r library; do
   libraries=$((libraries + 1))
 done < <(./licences.sh --libraries "${manifest}")
 [ "${libraries}" -gt 0 ] || { echo "the archive's manifest names no library" >&2; exit 1; }
+# musl, which a static linux curl holds whole and the manifest names as a
+# tool: its own COPYRIGHT is in the archive wherever the manifest has it, and
+# a linux archive's manifest has it.
+if grep -q '^\.musl ' "${manifest}"; then
+  grep -q '^musl as a whole is licensed' "${work}/${name}/licenses/musl/COPYRIGHT" 2> /dev/null || { echo "the archive links musl and carries no licenses/musl/COPYRIGHT" >&2; exit 1; }
+elif [ "$goos" = linux ]; then
+  echo "the linux manifest no longer names musl: revisit what C library the curl links, and its terms" >&2
+  exit 1
+fi
 # And the notices of their sources: a part for every directory of every
 # library the manifest names, by the list the build itself works from.
 notices="${work}/${name}/licenses/NOTICES"
