@@ -54,7 +54,15 @@ Assets: `curl_<version>_{linux,windows}_{amd64,arm64}.tar.gz` plus
 containing the `curl` binary, the curl `COPYING`, curl-for-win's
 `BUILD-MANIFEST.txt` (the libraries that curl links, statically, and their
 versions) and each of those libraries' licence under `licenses/<library>/`,
-as curl-for-win's own package carries them, and `licenses/NOTICES`, the
+as curl-for-win's own package carries them (and, in the linux archives,
+musl's own `COPYRIGHT` under `licenses/musl/`: the curl is static, so the C
+library is in the binary, and curl-for-win's package has no licence for it;
+in the windows ones, for the same reason, the MinGW-w64 runtime's notice
+under `licenses/mingw-w64/`; the compiler's own runtime, LLVM's compiler-rt,
+is linked in as well and has no file, since LLVM's exception to Apache 2.0
+lifts the licence's notice conditions for what compiling embeds in a
+program),
+and `licenses/NOTICES`, the
 notices those libraries' sources state, one of each: a project's licence
 file is its summary and can be short of what its sources ask to be
 reproduced (LibreSSL's is two texts and a sentence, where its sources carry

@@ -49,4 +49,32 @@ while read -r library; do
   count=$((count + 1))
 done < <(libraries "${manifest}")
 [ "${count}" -gt 0 ] || { echo "licences.sh: ${manifest} names no library" >&2; exit 1; }
+
+# musl is on a toolchain line of a linux package's manifest and is more than
+# a tool: the curl is static, so the C library is in the binary. curl-for-win
+# carries no licence for it; the text is musl's own COPYRIGHT, kept in this
+# repository for the version the manifest names (ahead of the distribution's
+# revision). Another version has no file here, and stops the build until
+# someone has read that version's.
+musl=$(awk '$1 == ".musl" { print $2 }' "${manifest}")
+if [ -n "${musl}" ]; then
+  text="$(cd "$(dirname "$0")" && pwd)/notices/musl-${musl%%-*}-COPYRIGHT"
+  [ -s "${text}" ] || { echo "licences.sh: the package links musl ${musl%%-*}, and this repository has no ${text##*/}" >&2; exit 1; }
+  mkdir -p "${to}/licenses/musl"
+  cp "${text}" "${to}/licenses/musl/COPYRIGHT"
+  count=$((count + 1))
+fi
+
+# The same of a windows package and the MinGW-w64 runtime, which its curl
+# is statically linked against and whose own notice says a program so linked
+# carries it. The runtime is the one llvm-mingw's release builds, at a commit
+# of mingw-w64 its build script names: the text is kept by that release.
+mingw=$(awk '$1 == ".llvm-mingw" { print $2 }' "${manifest}")
+if [ -n "${mingw}" ]; then
+  text="$(cd "$(dirname "$0")" && pwd)/notices/LICENSE-mingw-w64-runtime-llvm-mingw-${mingw}"
+  [ -s "${text}" ] || { echo "licences.sh: the package is built with llvm-mingw ${mingw}, and this repository has no ${text##*/}" >&2; exit 1; }
+  mkdir -p "${to}/licenses/mingw-w64"
+  cp "${text}" "${to}/licenses/mingw-w64/COPYING.MinGW-w64-runtime.txt"
+  count=$((count + 1))
+fi
 echo "licences: ${count} libraries, each with its licence"
