@@ -58,8 +58,34 @@ if [ "${1:-}" = --test ]; then
   # Another time is another archive: the time is the one given, not none.
   SOURCE_DATE_EPOCH=1700000001 "${self}" "${cases}/one" pkg "${cases}/later.tar.gz"
   ! cmp -s "${cases}/one.tar.gz" "${cases}/later.tar.gz" || { echo "archive.sh: the time given is not the time recorded" >&2; failed=1; }
+  # A tar that leaves an entry out and says nothing: it archives a copy of
+  # the tree short of one file, in place of the tree it was given.
+  mkdir "${cases}/bin"
+  real_tar=$(command -v tar)
+  cat > "${cases}/bin/tar" << STUB
+#!/usr/bin/env bash
+case " \$* " in
+*" -czf "*)
+  args=("\$@")
+  n=\${#args[@]}
+  rm -rf "${cases}/short"
+  mkdir "${cases}/short"
+  cp -R "\${args[n - 2]}/\${args[n - 1]}" "${cases}/short/"
+  rm "${cases}/short/\${args[n - 1]}/licenses/zlib/LICENSE"
+  args[n - 2]="${cases}/short"
+  exec "${real_tar}" "\${args[@]}"
+  ;;
+*) exec "${real_tar}" "\$@" ;;
+esac
+STUB
+  chmod 0755 "${cases}/bin/tar"
+  if SOURCE_DATE_EPOCH=1700000000 PATH="${cases}/bin:${PATH}" "${self}" "${cases}/one" pkg "${cases}/short.tar.gz" 2> /dev/null; then
+    echo "archive.sh: an archive short of its tree is accepted" >&2
+    failed=1
+  fi
+  [ ! -e "${cases}/short.tar.gz" ] || { echo "archive.sh: an archive short of its tree is left behind" >&2; failed=1; }
   [ "${failed}" -eq 0 ] || exit 1
-  echo "archive.sh: one tree, two ways, one archive"
+  echo "archive.sh: one tree, two ways, one archive; a short one refused"
   exit 0
 fi
 
@@ -74,3 +100,15 @@ epoch="${SOURCE_DATE_EPOCH:-$(git -C "$(dirname "$0")" log -1 --format=%ct)}"
 
 chmod -R u=rwX,go=rX "${parent:?}/${name:?}"
 tar --sort=name --mtime="@${epoch}" --owner=0 --group=0 --numeric-owner -czf "${out}" -C "${parent}" "${name}"
+
+# The archive is the tree, whole. A tar has stopped part-way through a
+# directory, written a well-formed archive of what it had and exited 0: what
+# it wrote is read back against the tree, and a short one is no archive.
+tree=$(cd "${parent}" && find "${name}" | LC_ALL=C sort)
+held=$(tar -tzf "${out}" | sed 's|/$||' | LC_ALL=C sort)
+if [ "${tree}" != "${held}" ]; then
+  echo "archive.sh: ${out} does not hold the tree it was made from (<: the tree, >: the archive):" >&2
+  diff <(printf '%s\n' "${tree}") <(printf '%s\n' "${held}") >&2 || true
+  rm -f "${out}"
+  exit 1
+fi
