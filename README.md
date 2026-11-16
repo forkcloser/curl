@@ -40,6 +40,14 @@ upstream bump — a 4th segment, never a `-suffix`: semver sorts `X.Y.Z-1`
 GitHub Artifact Attestations for every archive (aqua verifies these on
 install), and publishes with a `checksums.txt` for aqua's checksum pinning.
 
+An archive is the same bytes whenever it is built from the same commit with
+the same tools (`archive.sh`: entries sorted, the commit's time, owner 0).
+Two CI runs of one commit give the same five archives, and
+`PACKAGE_VERSION=<version> just build-windows` at the tag of a release after
+v8.23.0.1, on linux or macOS, gives the two windows archives its
+`checksums.txt` lists. A Windows host records other file modes, and so other
+bytes for the same content.
+
 Assets: `curl_<version>_{linux,windows}_{amd64,arm64}.tar.gz` plus
 `curl_<version>_darwin_arm64.tar.gz` (no darwin/amd64), `<version>` the tag's
 (the pinned curl's, with a fourth segment for a rebuild of the same curl), each

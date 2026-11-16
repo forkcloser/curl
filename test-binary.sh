@@ -13,7 +13,7 @@
 set -euo pipefail
 
 cd "$(dirname "$0")"
-# shellcheck source=versions.env disable=SC1091
+# shellcheck source=versions.env
 . ./versions.env
 curl_version="${CFW_PACKAGE%_*}"
 # The archive carries the release's version (PACKAGE_VERSION, the tag's), by

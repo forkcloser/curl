@@ -25,7 +25,7 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 root="$(pwd -P)"
-# shellcheck source=versions.env disable=SC1091
+# shellcheck source=versions.env
 . ./versions.env
 CURL_VERSION="${CFW_PACKAGE%_*}"
 # The archives carry the release's version: the tag's (PACKAGE_VERSION,
@@ -230,11 +230,13 @@ for pkg in "$work"/curl-"${CURL_VERSION}"*-"$pkgos".tar.xz; do
   [ "$pkgos" = 'macos' ] && goos='darwin'
 
   name="curl_${package_version}_${goos}_${arch}"
+  # Cleared first: what an earlier build left here is not this one's to ship.
+  rm -rf "build/${name:?}"
   mkdir -p "build/${name}"
   cp "$bin" "${pkgroot}/COPYING.txt" "build/${name}/"
   # The libraries the binary links travel with it, each with its terms.
   ./licences.sh "${pkgroot}" "build/${name}"
-  tar -czf "${out}/${name}.tar.gz" -C build "$name"
+  ./archive.sh build "$name" "${out}/${name}.tar.gz"
   echo "✓ ${out}/${name}.tar.gz"
 done
 
