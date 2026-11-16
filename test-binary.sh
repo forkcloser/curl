@@ -107,6 +107,13 @@ elif [ "$goos" = linux ]; then
   echo "the linux manifest no longer names musl: revisit what C library the curl links, and its terms" >&2
   exit 1
 fi
+# The MinGW-w64 runtime of a windows curl, the same way.
+if grep -q '^\.llvm-mingw ' "${manifest}"; then
+  grep -q '^MinGW-w64 runtime licensing' "${work}/${name}/licenses/mingw-w64/COPYING.MinGW-w64-runtime.txt" 2> /dev/null || { echo "the archive links the MinGW-w64 runtime and carries no licenses/mingw-w64/COPYING.MinGW-w64-runtime.txt" >&2; exit 1; }
+elif [ "$goos" = windows ]; then
+  echo "the windows manifest no longer names llvm-mingw: revisit what runtime the curl links, and its terms" >&2
+  exit 1
+fi
 # And the notices of their sources: a part for every directory of every
 # library the manifest names, by the list the build itself works from.
 notices="${work}/${name}/licenses/NOTICES"

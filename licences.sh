@@ -64,4 +64,17 @@ if [ -n "${musl}" ]; then
   cp "${text}" "${to}/licenses/musl/COPYRIGHT"
   count=$((count + 1))
 fi
+
+# The same of a windows package and the MinGW-w64 runtime, which its curl
+# is statically linked against and whose own notice says a program so linked
+# carries it. The runtime is the one llvm-mingw's release builds, at a commit
+# of mingw-w64 its build script names: the text is kept by that release.
+mingw=$(awk '$1 == ".llvm-mingw" { print $2 }' "${manifest}")
+if [ -n "${mingw}" ]; then
+  text="$(cd "$(dirname "$0")" && pwd)/notices/LICENSE-mingw-w64-runtime-llvm-mingw-${mingw}"
+  [ -s "${text}" ] || { echo "licences.sh: the package is built with llvm-mingw ${mingw}, and this repository has no ${text##*/}" >&2; exit 1; }
+  mkdir -p "${to}/licenses/mingw-w64"
+  cp "${text}" "${to}/licenses/mingw-w64/COPYING.MinGW-w64-runtime.txt"
+  count=$((count + 1))
+fi
 echo "licences: ${count} libraries, each with its licence"
