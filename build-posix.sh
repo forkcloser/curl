@@ -68,6 +68,12 @@ esac
 # tools and static libraries no build here runs, so the members are selected
 # from a listing first and the archive is read twice; what remains is ~750 MB,
 # and CI caches it on the pin.
+# What a build may take of the machine: BUILD_JOBS, BUILD_TIMEOUT, and for
+# the linux legs' container BUILD_CPUS and BUILD_MEMORY.
+# shellcheck source=build-caps.sh
+. "${root}/build-caps.sh"
+job_caps
+
 llvm_toolchain() {
   local name="llvm-$1" url sum version file dir list
   url="$(limen pins get "$name" url)"
@@ -168,20 +174,16 @@ if [ "$kind" = 'linux' ]; then
     export CW_REVISION="$CFW_REV"
     export DEBIAN_SUITE APT_SNAPSHOT
 
-    # Unsized, the build gets the whole machine; BUILD_CPUS and BUILD_MEMORY
-    # (docker's units) are overrides only.
-    runtime=(docker run --rm --platform "$platform")
-    [ -z "${BUILD_CPUS:-}" ] || runtime+=(--cpus "$BUILD_CPUS")
-    [ -z "${BUILD_MEMORY:-}" ] || runtime+=(--memory "$BUILD_MEMORY")
-
     # The tree mounted at its own path, CW_* env passed through, as in their
     # own workflow; the toolchain and the script read-only beside it.
-    "${runtime[@]}" --volume "$(pwd):$(pwd)" --workdir "$(pwd)" \
+    # Sized by build-caps.sh, and timed from inside: a timeout around the
+    # docker client would stop the client and leave the container building.
+    capped_docker_run --rm --platform "$platform" --volume "$(pwd):$(pwd)" --workdir "$(pwd)" \
       --volume "${llvm}:/opt/llvm:ro" \
       --volume "${root}/build/container:/opt/forkcloser:ro" \
-      --env-file <(env | grep -aE '^(CW_|DO_NOT_TRACK|DEBIAN_SUITE=|APT_SNAPSHOT=)') \
+      --env-file <(env | grep -aE '^(CW_|CMAKE_BUILD_PARALLEL_LEVEL=|DO_NOT_TRACK|DEBIAN_SUITE=|APT_SNAPSHOT=)') \
       "$BUILD_IMAGE" \
-      bash /opt/forkcloser/build-posix-container.sh
+      timeout "${build_timeout}" bash /opt/forkcloser/build-posix-container.sh
   )
 else
   # curl-for-win's mac script provisions its build dependencies with brew,
@@ -190,7 +192,7 @@ else
   # leg only, behind the pinned tools.
   brew="${BREW_BIN:-$(command -v brew || true)}"
   [ -n "$brew" ] || { echo "no brew (BREW_BIN is empty): curl-for-win's mac leg needs homebrew" >&2; exit 1; }
-  (cd "$work" && PATH="$PATH:$(dirname "$brew")" CW_CONFIG="$config" CW_REVISION="$CFW_REV" sh -c ./_ci-mac-homebrew.sh)
+  (cd "$work" && PATH="$PATH:$(dirname "$brew")" CW_CONFIG="$config" CW_REVISION="$CFW_REV" capped sh -c ./_ci-mac-homebrew.sh)
 fi
 
 # Collect: their packages are curl-<version>[_rev]-<cpu>-<os>.tar.xz in the

@@ -4,7 +4,7 @@ import '.limen/just/main.just'
 
 # The FIRST recipe defined here becomes `just`'s default (until then, the
 # shared default lists everything).
-lint: do::lint::default package-version-test archive-test notices-test
+lint: do::lint::default package-version-test archive-test notices-test build-caps-test
 fix: do::fix::default
 
 # The rule that holds a tag to the pinned curl, over its edges.
@@ -18,6 +18,11 @@ archive-test:
 # What has to stop the notices' build, and what must not.
 notices-test:
     ./notices.sh --test
+
+# The limits a build runs under: the job count reaches the build, the
+# container is sized, a build past its time is stopped with what it started.
+build-caps-test:
+    ./build-caps.sh --test
 
 # Basic sanity test of ONE built binary (build it first): it runs, reports the
 # expected version, and does a TLS 1.3 handshake. Takes the leg (linux-amd64,

@@ -36,6 +36,14 @@ the curl project's own reproducible-build system:
   three CI builds compared with it is one binary; nothing holds that from
   one runner image to the next.
 
+A linux or mac build does not take the whole machine. Each make, ninja and
+cmake build runs `BUILD_JOBS` jobs at once (4 unless set), a leg's build is
+stopped after `BUILD_TIMEOUT` (30 minutes unless set, as `timeout` takes it),
+and the linux legs' container gets `BUILD_CPUS` processors and `BUILD_MEMORY`
+of memory (4, or the host's count where it has fewer, and `8g` unless set,
+in docker's units). The mac leg has no
+container: its memory is bounded by the job count alone.
+
 The pins live in `versions.env` (the upstream curl version, curl-for-win's
 windows build revision, the curl-for-win commit — which is also the
 provenance of the vendored key, so bumping it means re-auditing their scripts
