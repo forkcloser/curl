@@ -24,6 +24,17 @@ the curl project's own reproducible-build system:
 - **macOS (arm64)** — same machinery, `a64` flavor (arm64-only; Intel Mac
   support was dropped, so no x86_64 slice / universal binary), built with
   Apple's clang as curl-for-win builds its own mac packages.
+  This leg's inputs are not all pins. The compiler, the SDK and the rest of
+  Apple's toolchain are those of the Xcode (or Command Line Tools) the
+  machine has selected. `cmake`, and `ninja` when there is one, are the
+  machine's Homebrew's, as installed there already: nothing here installs or
+  pins them. Whatever else the build runs from `/usr/bin` is the machine's
+  too. curl-for-win's
+  `_ci-mac-homebrew.sh`, run as it is, also installs `gnu-tar` and `jq` with
+  Homebrew, but the build runs this repository's pinned `gtar` and `jq`,
+  which come first on its PATH. The darwin curl of v8.23.0.1 and of the
+  three CI builds compared with it is one binary; nothing holds that from
+  one runner image to the next.
 
 The pins live in `versions.env` (the upstream curl version, curl-for-win's
 windows build revision, the curl-for-win commit — which is also the
