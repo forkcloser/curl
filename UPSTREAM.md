@@ -60,6 +60,11 @@ fetched and verified on the host and mounted read-only at `/opt/llvm`, with
 `CW_CCSUFFIX` empty because the release tarball's tools are unsuffixed where
 Debian's are `clang-22`. Nothing in `_build.sh` changes.
 
+The suite differs too. The pinned image is Debian trixie, so the static linux
+curl links trixie's musl, 1.2.5, where a build from Debian testing links
+1.2.6. curl-for-win builds the same pairing, trixie and musl 1.2.5, in its own
+`linux-musl-debian-stable-llvm` job.
+
 ### `stat` flags on macOS
 
 curl-for-win picks `stat`'s flags by uname (BSD `stat -f` on macOS), while
