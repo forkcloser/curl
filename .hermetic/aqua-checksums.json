@@ -1,6 +1,31 @@
 {
   "checksums": [
     {
+      "id": "github_release/github.com/Kitware/CMake/v4.5.1/cmake-4.5.1-linux-aarch64.tar.gz",
+      "checksum": "3BEC208F11ED96C173032EEAF97937C54DD246ACEFEE22ACD7794A6B4E70D536",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/Kitware/CMake/v4.5.1/cmake-4.5.1-linux-x86_64.tar.gz",
+      "checksum": "83B71181FB62B4FE8F26067A9321448572E7A43BD04FF6C7F54A24C33698F16D",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/Kitware/CMake/v4.5.1/cmake-4.5.1-macos-universal.tar.gz",
+      "checksum": "E1FB288543E4EB2A410E385ECEBC64323BDA51F0205782F2B094CCD5D572CA2D",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/Kitware/CMake/v4.5.1/cmake-4.5.1-windows-arm64.zip",
+      "checksum": "6782F11382941BB85C406EB3BD32A702222D8956535AE9CEC5EE77395BE2CC78",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/Kitware/CMake/v4.5.1/cmake-4.5.1-windows-x86_64.zip",
+      "checksum": "BFE6EADB245DC8213E0D3FEEA316B520CB2AAE92F5667FFD76059BA6B05C430C",
+      "algorithm": "sha256"
+    },
+    {
       "id": "github_release/github.com/anchore/syft/v1.57.1/syft_1.57.1_darwin_arm64.tar.gz",
       "checksum": "E0A74A5D2688D1254B4E17B71F068A83215E3625F846265BF6614C7BA06F3A96",
       "algorithm": "sha256"
@@ -238,6 +263,31 @@
     {
       "id": "github_release/github.com/lycheeverse/lychee/lychee-v0.24.2/lychee-x86_64-unknown-linux-musl.tar.gz",
       "checksum": "73657A111819A30C47C08352896796F23D64E4EB2B3ED39B6D32149241566FC5",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/ninja-build/ninja/v1.13.2/ninja-linux-aarch64.zip",
+      "checksum": "FD2CACC8050A7F12A16A2E48F9E06FCA5C14FC4C2BEE2BABB67B58BE17A607FC",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/ninja-build/ninja/v1.13.2/ninja-linux.zip",
+      "checksum": "5749CBC4E668273514150A80E387A957F933C6ED3F5F11E03FB30955E2BBEAD6",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/ninja-build/ninja/v1.13.2/ninja-mac.zip",
+      "checksum": "C99048673AA765960A99CF10C6DDB9F1FAD506099FF0A0E137AD8960A88F321B",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/ninja-build/ninja/v1.13.2/ninja-win.zip",
+      "checksum": "07FC8261B42B20E71D1720B39068C2E14FFCEE6396B76FB7A795FB460B78DC65",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/ninja-build/ninja/v1.13.2/ninja-winarm64.zip",
+      "checksum": "E52F0BDEF9DFB1003229DBD6508A508C4073FD017247002ADC66E5E806CB0391",
       "algorithm": "sha256"
     },
     {

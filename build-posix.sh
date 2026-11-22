@@ -12,8 +12,8 @@
 # release on the host, unpacks the tools the build invokes, and mounts them
 # read-only at /opt/llvm; build-posix-container.sh provisions inside the
 # image and runs their _build.sh. Every deviation from curl-for-win's own
-# scripts is listed in UPSTREAM.md. The mac leg runs directly on a macOS
-# machine (their script provisions its homebrew dependencies).
+# scripts is listed in UPSTREAM.md. The mac leg runs their _build.sh directly
+# on a macOS machine, with cmake and ninja from the pinned tools.
 #
 # The container runtime is `docker`, from the hermetic PATH like every other
 # tool, on every host. The amd64 leg on an arm64 mac runs under Rosetta
@@ -184,13 +184,34 @@ if [ "$kind" = 'linux' ]; then
       bash /opt/forkcloser/build-posix-container.sh
   )
 else
-  # curl-for-win's mac script provisions its build dependencies with brew,
-  # which the hermetic PATH hides. The .justfile exports BREW_BIN, captured
-  # from the ambient PATH for exactly this; its directory is appended for this
-  # leg only, behind the pinned tools.
-  brew="${BREW_BIN:-$(command -v brew || true)}"
-  [ -n "$brew" ] || { echo "no brew (BREW_BIN is empty): curl-for-win's mac leg needs homebrew" >&2; exit 1; }
-  (cd "$work" && PATH="$PATH:$(dirname "$brew")" CW_CONFIG="$config" CW_REVISION="$CFW_REV" sh -c ./_ci-mac-homebrew.sh)
+  # Their _ci-mac-homebrew.sh is not run: for this config it installs gnu-tar
+  # and jq with Homebrew and then runs ./_build.sh, and the pinned gtar and jq
+  # are on the PATH already. _build.sh takes ninja when it finds one and falls
+  # back to make without a word, so both drivers are required here, by name,
+  # from the pinned tools.
+  for tool in cmake ninja; do
+    command -v "$tool" >/dev/null || { echo "no ${tool} on the PATH: it is a pinned tool (.hermetic/hermetic.yaml)" >&2; exit 1; }
+  done
+  # Two tools are the machine's, taken by name: gpg, which checks the
+  # signatures of the sources _dl.sh fetches and which nothing pins, and brew,
+  # which _build.sh asks for Homebrew's prefix on a mac host (`brew --prefix`,
+  # to keep cmake out of it). The .justfile exports GPG_BIN and BREW_BIN,
+  # captured from the ambient PATH. Each goes on the PATH as one launcher in
+  # a directory of its own, so nothing else of the directory it lives in is
+  # reachable by bare name; a launcher and not a link, because brew takes its
+  # prefix from the path it is run by.
+  rm -rf build/host-tools
+  mkdir -p build/host-tools
+  for tool in gpg brew; do
+    case "$tool" in
+      gpg) path="${GPG_BIN:-}" ;;
+      brew) path="${BREW_BIN:-}" ;;
+    esac
+    [ -n "$path" ] || { echo "no ${tool} on this machine: the mac leg runs the machine's ${tool}" >&2; exit 1; }
+    printf '#!/bin/sh\nexec %q "$@"\n' "$path" > "build/host-tools/${tool}"
+    chmod +x "build/host-tools/${tool}"
+  done
+  (cd "$work" && PATH="$PATH:${root}/build/host-tools" CW_CONFIG="$config" CW_REVISION="$CFW_REV" ./_build.sh)
 fi
 
 # Collect: their packages are curl-<version>[_rev]-<cpu>-<os>.tar.xz in the

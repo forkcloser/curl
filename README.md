@@ -26,13 +26,17 @@ the curl project's own reproducible-build system:
   Apple's clang as curl-for-win builds its own mac packages.
   This leg's inputs are not all pins. The compiler, the SDK and the rest of
   Apple's toolchain are those of the Xcode (or Command Line Tools) the
-  machine has selected. `cmake`, and `ninja` when there is one, are the
-  machine's Homebrew's, as installed there already: nothing here installs or
-  pins them. Whatever else the build runs from `/usr/bin` is the machine's
-  too. curl-for-win's
-  `_ci-mac-homebrew.sh`, run as it is, also installs `gnu-tar` and `jq` with
-  Homebrew, but the build runs this repository's pinned `gtar` and `jq`,
-  which come first on its PATH. The darwin curl of v8.23.0.1 and of the
+  machine has selected, and whatever else the build runs from `/usr/bin` is
+  the machine's too. `cmake` and `ninja` are pinned tools
+  (`.hermetic/hermetic.yaml`). Homebrew's directory is not on the build's
+  PATH; two of the machine's tools are, each by name: `gpg`, which checks
+  the signatures of the sources, and `brew`, which curl-for-win's
+  `_build.sh` asks for Homebrew's prefix. With that prefix `_build.sh`
+  reaches a third by its path: where Homebrew holds `llvm`, its `llvm-strip`
+  strips the static libraries curl is linked from, and where it does not
+  they are left unstripped, as on CI's runner. Its `_ci-mac-homebrew.sh`, which
+  installs `gnu-tar` and `jq` with Homebrew, is not run: the build uses this
+  repository's pinned `gtar` and `jq`. The darwin curl of v8.23.0.1 and of the
   three CI builds compared with it is one binary; nothing holds that from
   one runner image to the next.
 
