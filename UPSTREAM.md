@@ -65,6 +65,21 @@ curl links trixie's musl, 1.2.5, where a build from Debian testing links
 1.2.6. curl-for-win builds the same pairing, trixie and musl 1.2.5, in its own
 `linux-musl-debian-stable-llvm` job.
 
+### The mac leg runs `_build.sh`, not `_ci-mac-homebrew.sh`
+
+curl-for-win's `_ci-mac-homebrew.sh` installs `gnu-tar` and `jq` with Homebrew
+for this config and runs `./_build.sh`, with Homebrew's directory on the PATH:
+the `cmake`, `ninja` and `gpg` of a build are whichever ones Homebrew has
+there. This repository never runs that script. `build-posix.sh` runs
+`./_build.sh` with `cmake` and `ninja` from the pinned tools
+(`.hermetic/hermetic.yaml`), the pinned `gtar` and `jq`, and two of the
+machine's tools reachable by name, `gpg` and `brew` (`_build.sh` calls
+`brew --prefix` on a mac host). Under that prefix `_build.sh` takes
+Homebrew's `llvm-strip` by its full path for the static libraries when
+Homebrew holds `llvm`, and leaves them unstripped when it does not (CI's
+runner has none), as it does under upstream's script. Nothing in `_build.sh`
+changes.
+
 ### `stat` flags on macOS
 
 curl-for-win picks `stat`'s flags by uname (BSD `stat -f` on macOS), while

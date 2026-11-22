@@ -21,4 +21,6 @@ packages:
   - name: farcloser/limen@v0.31.0 # renovate: depName=farcloser/limen
     registry: local
   - name: golang/go@go1.27.4
+  - name: Kitware/CMake@v4.5.1
+  - name: ninja-build/ninja@v1.13.2
   - import: ../.limen/hermetic.yaml

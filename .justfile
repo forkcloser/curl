@@ -4,7 +4,7 @@ import '.limen/just/main.just'
 
 # The FIRST recipe defined here becomes `just`'s default (until then, the
 # shared default lists everything).
-lint: do::lint::default package-version-test archive-test notices-test
+lint: do::lint::default package-version-test archive-test notices-test build-tools-test
 fix: do::fix::default
 
 # The rule that holds a tag to the pinned curl, over its edges.
@@ -18,6 +18,20 @@ archive-test:
 # What has to stop the notices' build, and what must not.
 notices-test:
     ./notices.sh --test
+
+# The mac leg's build drivers are pinned tools: each answers on the recipes'
+# PATH, at the version .hermetic/hermetic.yaml pins.
+build-tools-test:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    for pin in Kitware/CMake:cmake ninja-build/ninja:ninja; do
+        tool="${pin#*:}"
+        want="$(sed -n "s|^  - name: ${pin%:*}@v||p" .hermetic/hermetic.yaml)"
+        [ -n "$want" ] || { echo "build-tools-test: ${pin%:*} is not pinned in .hermetic/hermetic.yaml" >&2; exit 1; }
+        got="$("$tool" --version | head -n 1 | grep -oE '[0-9]+(\.[0-9]+)+')"
+        [ "$got" = "$want" ] || { echo "build-tools-test: ${tool} is ${got}, the pin is ${want}" >&2; exit 1; }
+    done
+    echo "ok"
 
 # Basic sanity test of ONE built binary (build it first): it runs, reports the
 # expected version, and does a TLS 1.3 handshake. Takes the leg (linux-amd64,
