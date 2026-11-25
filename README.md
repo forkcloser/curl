@@ -100,8 +100,8 @@ same on every platform:
   CI job may export for every program. They are the roots of the
   day curl-for-win pinned them and move only with a release of this
   repository: the linux archive's `BUILD-MANIFEST.txt` gives that day and
-  the exact file on its `certdata` line (2026-11-05 at curl-for-win
-  8.23.0_9). Their licence, MPL 2.0, is in the archive as curl-for-win's
+  the exact file on its `certdata` line (2026-11-13 at curl-for-win
+  8.23.0_10). Their licence, MPL 2.0, is in the archive as curl-for-win's
   package carries it, `licenses/certdata/LICENSE.desktop`, a link to the
   text.
 

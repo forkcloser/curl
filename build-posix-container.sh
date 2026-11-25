@@ -55,7 +55,7 @@ apt-get --option Dpkg::Use-Pty=0 --yes --quiet install --no-install-suggests --n
 
 export PATH="/opt/llvm/bin:${PATH}"
 # _build.sh appends CW_CCSUFFIX to every tool name (clang${CW_CCSUFFIX}); the
-# release tarball's are bare, where _ci-linux-debian.sh would set '-22'.
+# release tarball's are bare, where _ci-linux-debian.sh would set '-23'.
 export CW_CCSUFFIX=''
 echo ">> toolchain: $(clang --version | head -n 1)"
 
