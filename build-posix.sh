@@ -121,17 +121,17 @@ git -C "$work" checkout --quiet "$CFW_COMMIT"
 
 # curl-for-win picks stat's flags by uname (BSD `stat -f` on macOS), while the
 # hermetic PATH's coreutils are GNU on every platform. Send macOS down the GNU
-# branch of its six `bsd|mac)` stat cases. The files are restored first so a
+# branch of its seven `bsd|mac)` stat cases. The files are restored first so a
 # rerun patches pristine copies, and any other count stops the build: a
 # CFW_COMMIT bump that moves these cases must not leave them half-patched.
 # The commit's whole tree is counted beside the files: a case in a file that
 # is not listed here would be left on the BSD branch with the count intact.
-cfw_stat_files=(curl.sh _pkg.sh _info-bin.sh openssl.sh _sign-code.sh)
+cfw_stat_files=(curl.sh _pkg.sh _info-bin.sh openssl.sh _sign-code.sh _sign-pkg-minisign.sh)
 git -C "$work" checkout --quiet "$CFW_COMMIT" -- "${cfw_stat_files[@]}"
 cfw_stat_sites=$(cd "$work" && cat "${cfw_stat_files[@]}" | grep -c 'bsd|mac)' || true)
 cfw_stat_tree=$(git -C "$work" grep -h 'bsd|mac)' "$CFW_COMMIT" -- . | grep -c '' || true)
-if [ "$cfw_stat_sites" -ne 6 ] || [ "$cfw_stat_tree" -ne 6 ]; then
-  echo "curl-for-win ${CFW_COMMIT} has ${cfw_stat_sites} 'bsd|mac)' cases in ${cfw_stat_files[*]} and ${cfw_stat_tree} in its whole tree, not the 6 this patch expects in both" >&2
+if [ "$cfw_stat_sites" -ne 7 ] || [ "$cfw_stat_tree" -ne 7 ]; then
+  echo "curl-for-win ${CFW_COMMIT} has ${cfw_stat_sites} 'bsd|mac)' cases in ${cfw_stat_files[*]} and ${cfw_stat_tree} in its whole tree, not the 7 this patch expects in both" >&2
   exit 1
 fi
 for f in "${cfw_stat_files[@]}"; do
