@@ -119,10 +119,6 @@ eleven:
 gh attestation verify curl_<version>_linux_amd64.tar.gz --repo packcloser/curl
 ```
 
-Releases up to `v8.23.0.3` were cut when this repository was
-`forkcloser/curl` and are signed under that name: for those, name
-`forkcloser/curl` in the command above and in the one below.
-
 The keyless signature over `checksums.txt`, for a verifier with cosign and
 no `gh`:
 
