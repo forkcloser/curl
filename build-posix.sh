@@ -182,10 +182,10 @@ if [ "$kind" = 'linux' ]; then
     # own workflow; the toolchain and the script read-only beside it.
     "${runtime[@]}" --volume "$(pwd):$(pwd)" --workdir "$(pwd)" \
       --volume "${llvm}:/opt/llvm:ro" \
-      --volume "${root}/build/container:/opt/forkcloser:ro" \
+      --volume "${root}/build/container:/opt/packcloser:ro" \
       --env-file <(env | grep -aE '^(CW_|DO_NOT_TRACK|DEBIAN_SUITE=|APT_SNAPSHOT=)') \
       "$BUILD_IMAGE" \
-      bash /opt/forkcloser/build-posix-container.sh
+      bash /opt/packcloser/build-posix-container.sh
   )
 else
   # Their _ci-mac-homebrew.sh is not run: for this config it installs gnu-tar

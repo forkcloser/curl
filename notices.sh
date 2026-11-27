@@ -17,7 +17,7 @@
 # holders where its sources name more. The archive carries the summaries
 # and this file, which is taken from the sources: every run of comments
 # that speaks of a copyright, in each .c, .h and .S of the directories
-# named. forkcloser/openssh's script of the same name, with the wordings of
+# named. packcloser/openssh's script of the same name, with the wordings of
 # the libraries curl links.
 #
 # The sources of a directory, whether this platform compiles them or not:

@@ -116,8 +116,12 @@ it is itself what vouches for `checksums.txt`). The same command covers the
 eleven:
 
 ```sh
-gh attestation verify curl_<version>_linux_amd64.tar.gz --repo forkcloser/curl
+gh attestation verify curl_<version>_linux_amd64.tar.gz --repo packcloser/curl
 ```
+
+Releases up to `v8.23.0.3` were cut when this repository was
+`forkcloser/curl` and are signed under that name: for those, name
+`forkcloser/curl` in the command above and in the one below.
 
 The keyless signature over `checksums.txt`, for a verifier with cosign and
 no `gh`:
@@ -125,7 +129,7 @@ no `gh`:
 ```sh
 cosign verify-blob checksums.txt --bundle checksums.txt.sigstore.json \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-  --certificate-identity-regexp '^https://github.com/forkcloser/curl/\.github/workflows/release\.yaml@'
+  --certificate-identity-regexp '^https://github.com/packcloser/curl/\.github/workflows/release\.yaml@'
 sha256sum -c --ignore-missing checksums.txt
 ```
 
@@ -172,9 +176,9 @@ committed-pin belt to the attestation's suspenders.
 
 ```yaml
 - type: github_release
-  repo_owner: forkcloser
+  repo_owner: packcloser
   repo_name: curl
-  description: curl with dependable TLS 1.3, first-party build (forkcloser/curl)
+  description: curl with dependable TLS 1.3, first-party build (packcloser/curl)
   asset: curl_{{trimV .Version}}_{{.OS}}_{{.Arch}}.tar.gz
   format: tar.gz
   files:
@@ -191,7 +195,7 @@ committed-pin belt to the attestation's suspenders.
     asset: checksums.txt
     algorithm: sha256
   github_artifact_attestations:
-    signer_workflow: forkcloser/curl/.github/workflows/release.yaml
+    signer_workflow: packcloser/curl/.github/workflows/release.yaml
   supported_envs:
     - darwin/arm64   # no darwin/amd64 — Intel Mac support was dropped
     - linux
