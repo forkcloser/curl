@@ -43,7 +43,7 @@ run its build system at the commit below.
   The six earlier `bsd|mac)` stat sites and the five `mac) rm -f -P` sites below are where
   they were, and `cosign.pub.asc` is unchanged, the same key as the one in their README at
   this commit. Earlier audits: 2026-11-14 at `f21b050`, 2026-10-18 at `f478a7c`, 2026-10-05
-  ([#41](https://github.com/forkcloser/curl/pull/41)).
+  ([#41](https://github.com/packcloser/curl/pull/41)).
 
 A bump of `CFW_COMMIT` re-audits curl-for-win's scripts and every entry below; nothing
 else about them is changed, in silence or otherwise. Each entry names where the change
@@ -54,9 +54,9 @@ expect, so a bump that moves a site stops the build instead of half-patching it.
 
 | Change | Where | Here |
 | --- | --- | --- |
-| The linux legs are provisioned by pinned inputs, never by `_ci-linux-debian.sh` | `build-posix.sh`, `build-posix-container.sh` | https://github.com/forkcloser/curl/pull/64 |
-| macOS takes the GNU `stat` branch | seven `bsd\|mac)` sites in `curl.sh`, `_pkg.sh`, `_info-bin.sh`, `openssl.sh`, `_sign-code.sh`, `_sign-pkg-minisign.sh` | [`8b648d1`](https://github.com/forkcloser/curl/commit/8b648d1) |
-| The `rm -P` branches for macOS are removed | five `mac) rm -f -P --` sites in `_build.sh`, `_ul.sh` | [`8b648d1`](https://github.com/forkcloser/curl/commit/8b648d1) |
+| The linux legs are provisioned by pinned inputs, never by `_ci-linux-debian.sh` | `build-posix.sh`, `build-posix-container.sh` | https://github.com/packcloser/curl/pull/64 |
+| macOS takes the GNU `stat` branch | seven `bsd\|mac)` sites in `curl.sh`, `_pkg.sh`, `_info-bin.sh`, `openssl.sh`, `_sign-code.sh`, `_sign-pkg-minisign.sh` | [`8b648d1`](https://github.com/packcloser/curl/commit/8b648d1) |
+| The `rm -P` branches for macOS are removed | five `mac) rm -f -P --` sites in `_build.sh`, `_ul.sh` | [`8b648d1`](https://github.com/packcloser/curl/commit/8b648d1) |
 
 ### The linux legs are provisioned here, not by `_ci-linux-debian.sh`
 

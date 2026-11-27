@@ -41,7 +41,7 @@
     "packageRules, custom.curl-for-win, minimumReleaseAge: no cooldown, and that is a protection given up. curl.se's directory index carries no release date, and Renovate never holds a release without one to be past minimumReleaseAge: with the cooldown, the bump stays pending for ever and no pull request is opened. Without it, the days in which a package its own project published and signed is found to be bad are gone; the sigstore bundle CI verifies against the vendored cosign.pub.asc says who published it, not that it is sound. What stands in their place: the approval the pull request waits on, which reads what changed upstream."
   ],
   "extends": [
-    "local>forkcloser/curl//.limen/renovate"
+    "local>packcloser/curl//.limen/renovate"
   ],
   "forkProcessing": "enabled",
   "gitIgnoredAuthors": [
